@@ -1,8 +1,5 @@
 # Next.js + React + Tailwind CSS + TypeScript + ESLint project template
 
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/seedabit/nextjs-react-typescript/blob/main/README.md)
-[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/seedabit/nextjs-react-typescript/blob/main/README.pt-br.md)
-
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app@12`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Index
@@ -261,7 +258,3 @@ To quickly and easily generate favicons for the app, go to [Favicon Generator](h
 
 - [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss): IntelliSense for Tailwind CSS.
 - [React](https://marketplace.visualstudio.com/items?itemName=dsznajder.es7-react-js-snippets): React snippets for JSX and TSX.
-
-## License
-
-This project is licensed, see the [LICENSE](LICENSE) file for details.

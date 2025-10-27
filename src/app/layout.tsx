@@ -23,15 +23,11 @@ export const metadata: Metadata = {
     abstract: 'Descrição do App',
 }
 
-export default function RootLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode
-}>) {
+export default function RootLayout({children,}: Readonly<{children: React.ReactNode}>) {
     return (
         <html lang='pt-BR'>
             <head>
-                <link rel="preload" href="/images/seed-a-mascot.svg" as="image" />
+
                 <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96" />
                 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
                 <link rel="shortcut icon" href="/icons/favicon.ico" />
