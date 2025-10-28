@@ -60,15 +60,15 @@ export const cookieUtils = {
     if (typeof document === "undefined") return false; // Verificação de segurança SSR
 
     try {
-      document.cookie = "cookietest=1; SameSite=Strict; Secure";
+      const secure = window.location.protocol === "https:" ? "; Secure" : "";
+      document.cookie = `cookietest=1; SameSite=Strict${secure}`;
       const result = document.cookie.indexOf("cookietest=") !== -1;
       document.cookie =
-        "cookietest=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict; Secure";
+        `cookietest=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict${secure}`;
       return result;
     } catch {
       return false;
     }
-  },
 };
 
 // Utilitários específicos de Token com suporte a Lembrar de mim
