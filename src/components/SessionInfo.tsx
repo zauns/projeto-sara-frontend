@@ -64,11 +64,6 @@ const SessionInfo: React.FC<SessionInfoProps> = ({
         }
       };
 
-      // Armazena o horário de login se não existir
-      if (!localStorage.getItem("login_time")) {
-        localStorage.setItem("login_time", new Date().getTime().toString());
-      }
-
       updateTimeRemaining();
       const interval = setInterval(updateTimeRemaining, 60000); // Atualiza a cada minuto
 

@@ -94,6 +94,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Armazena dados do usuário com tipo de armazenamento apropriado
       userDataUtils.setUserData(userData, rememberMe);
 
+      // Armazena o horário de login para cálculo de tempo restante
+      if (rememberMe) {
+        localStorage.setItem("login_time", new Date().getTime().toString());
+      }
+
       // Navega para a página home
       router.push("/home");
     } catch (error) {
@@ -111,6 +116,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Limpa todos os dados armazenados (tokens e dados do usuário)
       tokenUtils.removeAuthToken();
       userDataUtils.removeUserData();
+
+      // Remove o horário de login
+      localStorage.removeItem("login_time");
 
       // Navega para a página de login
       router.push("/login");
