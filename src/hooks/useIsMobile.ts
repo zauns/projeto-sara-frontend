@@ -12,7 +12,7 @@ export const useIsMobile = (): boolean | null => {
 
   useEffect(() => {
     const checkDevice = () => {
-      setIsMobile(window.innerWidth < 480);
+      setIsMobile(window.innerWidth < 640);
     };
 
     // Define o valor no "mount" do lado do cliente
