@@ -1,7 +1,20 @@
-import type { NextConfig } from 'next'
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    reactStrictMode: true, // causes double render on component mount (dev)
-}
+	output: "standalone",
+	async rewrites() {
+		return [
+			{
+				source: "/api/:path*",
+				destination: "http://backend:8080/api/:path*",
+			},
+		];
+	},
 
-export default nextConfig
+	async redirects() {
+		return [];
+	},
+	reactStrictMode: true, // causes double render on component mount (dev)
+};
+
+export default nextConfig;
