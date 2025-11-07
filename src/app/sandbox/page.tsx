@@ -2,12 +2,17 @@ import { Header } from '@/components/core/header';
 import { SearchBar } from '@/components/core/search-bar';
 import { JobCard } from '@/components/core/job-card';
 import { GuideCard } from '@/components/core/guide-card';
+import { ProfilePhotoCard } from '@/components/core/profile-photo-card';
+import { UserDetailsCard } from '@/components/core/user-details-card';
+import { CurriculumForm } from '@/components/core/curriculum-form';
+import { CurriculumDisplay } from '@/components/core/curriculum-display';
+
 
 export default function SandboxPage() {
   return (
     <div>
-
       <Header />
+      {/*
       <SearchBar />
       <JobCard
         jobType="Tipo de vaga"
@@ -15,7 +20,7 @@ export default function SandboxPage() {
         location="Localização"
         modality="Modalidade"
         companyName="Empresa"
-        postTime="atrás" // Aqui está o seu "atrás"
+        postTime="atrás"
       />
       <JobCard
         jobType="Engenharia de Software"
@@ -36,7 +41,16 @@ export default function SandboxPage() {
         authorTitle="Especialista em RH"
         authorImageUrl="https://github.com/shadcn.png"
       />
+      */}
+      {/*
+      <ProfilePhotoCard />
 
+      <UserDetailsCard/>
+      */}
+
+      {/*<CurriculumForm />*/}
+
+      <CurriculumDisplay />
     </div>
   );
 }
