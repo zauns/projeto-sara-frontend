@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,14 +12,34 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "../ui/textarea";
+import { CompanyRegistrationSuccessDialog } from './company-registration-dialogue';
+
 
 //Formulário principal para o cadastro de novas empresas,
 export function CompanyRegistrationForm() {
+
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    const router = useRouter();
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        console.log("Formulário enviado!");
+
+        // Simula o sucesso da API (mostrar pop-up)
+        setShowSuccessDialog(true);
+    };
+
+    const handleGoToLogin = (path: string) => {
+        setShowSuccessDialog(false);
+        router.push(path);
+    };
+
     return (
         <div className="w-full max-w-2xl mx-auto p-4 md:p-8">
-            <form className="space-y-8">
+
+            <form className="space-y-8" onSubmit={handleSubmit}>
 
                 {/*Informações da Empresa*/}
                 <fieldset className="space-y-6">
@@ -34,6 +56,7 @@ export function CompanyRegistrationForm() {
                         <Label htmlFor="cnpj">CNPJ</Label>
                         <Input id="cnpj" placeholder="Placeholder" />
                     </div>
+
                     <div className="space-y-2">
                         <Label htmlFor="businessPlan">Plano de Negócio</Label>
                         <Textarea
@@ -50,24 +73,17 @@ export function CompanyRegistrationForm() {
                                 <SelectValue placeholder="Selecione o estado" />
                             </SelectTrigger>
                             <SelectContent className="bg-white max-h-[300px]">
-                                {/* Sudeste */}
                                 <SelectItem value="ES">Espírito Santo</SelectItem>
                                 <SelectItem value="MG">Minas Gerais</SelectItem>
                                 <SelectItem value="RJ">Rio de Janeiro</SelectItem>
                                 <SelectItem value="SP">São Paulo</SelectItem>
-
-                                {/* Sul */}
                                 <SelectItem value="PR">Paraná</SelectItem>
                                 <SelectItem value="RS">Rio Grande do Sul</SelectItem>
                                 <SelectItem value="SC">Santa Catarina</SelectItem>
-
-                                {/* Centro-Oeste */}
                                 <SelectItem value="DF">Distrito Federal</SelectItem>
                                 <SelectItem value="GO">Goiás</SelectItem>
                                 <SelectItem value="MT">Mato Grosso</SelectItem>
                                 <SelectItem value="MS">Mato Grosso do Sul</SelectItem>
-
-                                {/* Nordeste */}
                                 <SelectItem value="AL">Alagoas</SelectItem>
                                 <SelectItem value="BA">Bahia</SelectItem>
                                 <SelectItem value="CE">Ceará</SelectItem>
@@ -77,8 +93,6 @@ export function CompanyRegistrationForm() {
                                 <SelectItem value="PI">Piauí</SelectItem>
                                 <SelectItem value="RN">Rio Grande do Norte</SelectItem>
                                 <SelectItem value="SE">Sergipe</SelectItem>
-
-                                {/* Norte */}
                                 <SelectItem value="AC">Acre</SelectItem>
                                 <SelectItem value="AP">Amapá</SelectItem>
                                 <SelectItem value="AM">Amazonas</SelectItem>
@@ -159,22 +173,30 @@ export function CompanyRegistrationForm() {
                 {/* Botões */}
                 <div className="flex flex-col-reverse md:flex-row justify-end gap-3 pt-4">
                     <Button
-                        type="button" // Evita o submit do formulário
+                        type="button"
                         variant="outline"
                         className="w-full md:w-auto border-gray-400 text-gray-700 hover:bg-gray-100"
+                        onClick={() => router.back()}
                     >
                         Voltar
                     </Button>
                     <Button
                         type="submit"
-                        variant="destructive" // Usando o tema vermelho
+                        variant="destructive"
                         className="w-full md:w-auto bg-red-400 hover:bg-red-500"
                     >
-                        Continuar
+                        Solicitar Cadastro
                     </Button>
                 </div>
 
             </form>
+
+            {/* Renderizar o Diálogo */}
+            <CompanyRegistrationSuccessDialog
+                isOpen={showSuccessDialog}
+                onClose={() => setShowSuccessDialog(false)}
+                onGoToLogin={handleGoToLogin}
+            />
         </div>
     );
 }
