@@ -6,6 +6,7 @@ import { ProfilePhotoCard } from '@/components/core/profile-photo-card';
 import { UserDetailsCard } from '@/components/core/user-details-card';
 import { CurriculumForm } from '@/components/core/curriculum-form';
 import { CurriculumDisplay } from '@/components/core/curriculum-display';
+import { CompanyRegistrationForm } from '@/components/core/company-registration-form';
 
 
 export default function SandboxPage() {
@@ -42,15 +43,17 @@ export default function SandboxPage() {
         authorImageUrl="https://github.com/shadcn.png"
       />
       */}
-      
+      {/*
       <ProfilePhotoCard />
 
       <UserDetailsCard/>
-      
+      /*}
 
       {/*<CurriculumForm />*/}
 
       {/*<CurriculumDisplay />*/}
+
+      <CompanyRegistrationForm />
     </div>
   );
 }
