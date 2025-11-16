@@ -1,7 +1,10 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // Componente de Input do Shadcn
 import { Label } from "@/components/ui/label"; // Componente de Label do Shadcn
+import { ConfirmationDialog } from "./confirmation-dialogue";
 
 // Props para preencher os dados do usuário
 type UserDetailsCardProps = {
@@ -59,12 +62,13 @@ export function UserDetailsCard(props: UserDetailsCardProps) {
                     <div className="flex flex-col md:flex-row gap-3">
                         <Button 
                             variant="outline" 
-                            className="w-full border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600"
+                            className="w-full border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600"
                         >
-                            Add. currículo
+                            Adicionar currículo
                         </Button>
                         <Button 
-                            className="w-full bg-red-400 hover:bg-red-500"
+                            variant="outline"
+                            className="w-full border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600"
                         >
                             Editar Perfil
                         </Button>
@@ -73,16 +77,20 @@ export function UserDetailsCard(props: UserDetailsCardProps) {
                     {/* Botões de Perigo (Log Out, Apagar) */}
                     <Button 
                         variant="destructive" 
-                        className="w-full bg-red-600 hover:bg-red-700"
+                        className="w-full bg-red-500 hover:bg-red-600"
                     >
                         Log Out
                     </Button>
-                    <Button 
-                        variant="destructive" 
-                        className="w-full bg-red-600 hover:bg-red-700"
-                    >
-                        Apagar Conta
-                    </Button>
+                    <ConfirmationDialog title="Apagar Conta" description="Tem certeza que deseja apagar sua conta? Essa ação é irreversível!" onConfirm={() => {
+                            console.log("Conta apagada!");
+                            // lógica real de apagar a conta vem aqui
+                        }}
+                        trigger={
+                            <Button variant="destructive" className="w-full bg-red-500 hover:bg-red-600">
+                                Apagar Conta
+                            </Button>
+                        }
+                    />
                 </div>
                 
             </CardContent>

@@ -42,15 +42,15 @@ export default function SandboxPage() {
         authorImageUrl="https://github.com/shadcn.png"
       />
       */}
-      {/*
+      
       <ProfilePhotoCard />
 
       <UserDetailsCard/>
-      */}
+      
 
       {/*<CurriculumForm />*/}
 
-      <CurriculumDisplay />
+      {/*<CurriculumDisplay />*/}
     </div>
   );
 }
