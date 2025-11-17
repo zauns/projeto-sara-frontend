@@ -13,7 +13,7 @@ export default function SandboxPage() {
   return (
     <div>
       <Header />
-      {/*
+      
       <SearchBar />
       <JobCard
         jobType="Tipo de vaga"
@@ -42,16 +42,16 @@ export default function SandboxPage() {
         authorTitle="Especialista em RH"
         authorImageUrl="https://github.com/shadcn.png"
       />
-      */}
-      {/*
+      
+    
       <ProfilePhotoCard />
 
       <UserDetailsCard/>
-      /*}
 
-      {/*<CurriculumForm />*/}
 
-      {/*<CurriculumDisplay />*/}
+      <CurriculumForm/>
+
+      <CurriculumDisplay/>
 
       <CompanyRegistrationForm />
     </div>

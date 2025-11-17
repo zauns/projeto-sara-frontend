@@ -1,24 +1,30 @@
-import Image from 'next/image'
-import { SideBar } from '@/components/core/drawer';
+import React from "react";
+import Image from "next/image";
+import { SideBar } from "@/components/core/drawer";
 
-export function Header(){
-	return (
-		<header className='sticky top-0 z-50 w-full bg-white shadow-sm'>
-			<div className="flex justify-between p-4 text-black border-b items-center">
-				<div className="flex items-center gap-2">
-					<SideBar />
-					<Image 
-						src="/icons/logoSara.png"
-						alt="Logo da SARA"
-						width={50}
-						height={50}
-					/>
-					<h1 className="text-2x1 font-bold">SARA</h1>
-				</div>
-				<div>
-					<h1 className="text-2x1 font-bold">EMPREGA</h1>
-				</div>
-			</div>
-		</header>
-	)
+interface HeaderProps {
+  onLogout: () => void;
 }
+
+export const Header: React.FC<HeaderProps> = ({ onLogout }) => {
+  return (
+    <header className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center gap-2">
+            <SideBar onLogout={onLogout} />
+            <Image
+              src="/icons/logoSara.png"
+              alt="Logo da SARA"
+              width={50}
+              height={50}
+            />
+            <h1 className="text-2xl font-bold text-gray-900 truncate md:text-3xl">
+              SARA Emprega
+            </h1>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
