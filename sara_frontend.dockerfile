@@ -7,7 +7,7 @@ RUN npm ci
 
 COPY . .
 
-RUN npm install class-variance-authority # atualizar as dependências
+RUN npm install # atualizar as dependências
 RUN npm run build
 
 FROM node:20-alpine AS run
