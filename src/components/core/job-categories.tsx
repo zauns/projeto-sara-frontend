@@ -12,7 +12,7 @@ const VagasCategorySelector: React.FC<CategorySelectorProps> = ({
   initialSelectedCategory = "Vagas",
 }) => {
   const [selectedCategory, setSelectedCategory] = useState(
-    initialSelectedCategory
+    initialSelectedCategory,
   );
 
   const handleCategoryClick = (category: string) => {
@@ -37,18 +37,11 @@ const VagasCategorySelector: React.FC<CategorySelectorProps> = ({
             // - 'md:' (desktop): 'md:flex-none' remove o 'flex-1'
             //   para que se agrupem, e 'md:text-left' alinha o texto.
             className={`py-3 px-4 text-gray-700 font-medium flex-1 text-center md:flex-none md:text-left ${
-              selectedCategory === category
-                ? "border-b-2 border-[#F55F58]"
-                : ""
+              selectedCategory === category ? "border-b-2 border-[#F55F58]" : ""
             }`}
           >
             {category}
           </button>
-          {index < categories.length - 1 && (
-            // MUDANÇA 3: Removido 'h-6'
-            // A altura agora é controlada pelo 'items-stretch' no pai.
-            <div className="border-r border-black" />
-          )}
         </React.Fragment>
       ))}
     </div>

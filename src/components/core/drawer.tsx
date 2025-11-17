@@ -69,7 +69,7 @@ export function SideBar({ onLogout }: SideBarProps) {
           <SidebarLink href="#" icon={<Bell className="h-5 w-5" />}>
             Notificações
           </SidebarLink>
-          <SidebarLink href="#" icon={<User className="h-5 w-5" />}>
+          <SidebarLink href="/perfil" icon={<User className="h-5 w-5" />}>
             Perfil
           </SidebarLink>
           <SidebarLink href="#" icon={<Settings className="h-5 w-5" />}>

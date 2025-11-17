@@ -1,18 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea"; // Novo componente
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // Novo componente
-import { Card, CardContent } from "../ui/card";
+} from "@/components/ui/select";
+import { Card } from "../ui/card";
+import { useState } from "react";
+import { CurriculumData } from "@/types/curriculum"; // Import do tipo compartilhado
 
-// props/dados do formulário
-type CurriculumFormProps = {
+interface CurriculumFormProps {
+  // Props opcionais para inicialização
   fullName?: string;
   phoneNumber?: string;
   email?: string;
@@ -21,112 +23,162 @@ type CurriculumFormProps = {
   education?: string;
   city?: string;
   skills?: string;
-};
+  onSave: (data: CurriculumData) => void;
+  onCancel: () => void;
+}
 
-// Formulario do curriculo
 export function CurriculumForm(props: CurriculumFormProps) {
+  // Garantir que o estado inicial tenha valores padrão (nunca undefined)
+  const [formData, setFormData] = useState<CurriculumData>({
+    fullName: props.fullName || "",
+    phoneNumber: props.phoneNumber || "",
+    email: props.email || "",
+    objective: props.objective || "",
+    experience: props.experience || "",
+    education: props.education || "",
+    city: props.city || "",
+    skills: props.skills || "",
+  });
+
+  // Handler genérico para inputs
+  const handleInputChange = (field: keyof CurriculumData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Handler para submit
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    props.onSave(formData); // Passa apenas os dados
+  };
+
   return (
     <div className="p-4">
-    <Card className="bg-white shadow-md border-gray-200">
-    <form className="w-full md:p-6 space-y-6">
-      
-        {/* Campo Nome completo */}
-        <div className="space-y-2">
+      <Card className="bg-white shadow-md border-gray-200">
+        <form onSubmit={handleSubmit} className="w-full md:p-6 space-y-6">
+          
+          {/* Campo Nome completo */}
+          <div className="space-y-2">
             <Label htmlFor="fullName">Nome completo</Label>
-            <Input id="fullName" placeholder="Placeholder" defaultValue={props.fullName} />
-        </div>
+            <Input 
+              id="fullName" 
+              placeholder="Digite seu nome completo"
+              value={formData.fullName}
+              onChange={(e) => handleInputChange('fullName', e.target.value)}
+            />
+          </div>
 
-        {/* Grid para Número e Email lado a lado em telas maiores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Grid para Número e Email */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Número</Label>
-                <Input id="phoneNumber" placeholder="Placeholder" defaultValue={props.phoneNumber} />
+              <Label htmlFor="phoneNumber">Número</Label>
+              <Input 
+                id="phoneNumber" 
+                placeholder="(00) 00000-0000"
+                value={formData.phoneNumber}
+                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+              />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="Placeholder" defaultValue={props.email} />
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="seu.email@exemplo.com"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+              />
             </div>
-        </div>
+          </div>
 
-        {/* Campo Objetivo Profissional (Textarea) */}
-        <div className="space-y-2">
+          {/* Campo Objetivo Profissional */}
+          <div className="space-y-2">
             <Label htmlFor="objective">Objetivo Profissional</Label>
             <Textarea 
-                id="objective" 
-                placeholder="Placeholder" 
-                defaultValue={props.objective} 
-                className="min-h-[100px]" // Define uma altura mínima
+              id="objective" 
+              placeholder="Descreva seu objetivo profissional"
+              value={formData.objective}
+              onChange={(e) => handleInputChange('objective', e.target.value)}
+              className="min-h-[100px]"
             />
-        </div>
+          </div>
 
-        {/* Campo Experiência Profissional (Textarea) */}
-        <div className="space-y-2">
+          {/* Campo Experiência Profissional */}
+          <div className="space-y-2">
             <Label htmlFor="experience">Experiência Profissional</Label>
             <Textarea 
-                id="experience" 
-                placeholder="Placeholder" 
-                defaultValue={props.experience}
-                className="min-h-[150px]"
+              id="experience" 
+              placeholder="Descreva sua experiência profissional"
+              value={formData.experience}
+              onChange={(e) => handleInputChange('experience', e.target.value)}
+              className="min-h-[150px]"
             />
-        </div>
+          </div>
 
-        {/* Campo Formação Acadêmica (Textarea) */}
-        <div className="space-y-2">
+          {/* Campo Formação Acadêmica */}
+          <div className="space-y-2">
             <Label htmlFor="education">Formação Acadêmica</Label>
             <Textarea 
-            id="education" 
-            placeholder="Placeholder" 
-            defaultValue={props.education}
-            className="min-h-[100px]"
+              id="education" 
+              placeholder="Descreva sua formação acadêmica"
+              value={formData.education}
+              onChange={(e) => handleInputChange('education', e.target.value)}
+              className="min-h-[100px]"
             />
-        </div>
+          </div>
 
-        {/* Campo Habilidades */}
-        <div className="space-y-2">
-            <Label htmlFor="education">Habilidades e Competências</Label>
+          {/* Campo Habilidades */}
+          <div className="space-y-2">
+            <Label htmlFor="skills">Habilidades e Competências</Label>
             <Textarea 
                 id="skills" 
-                placeholder="Placeholder" 
-                defaultValue={props.skills}
+                placeholder="Liste suas habilidades"
+                value={formData.skills}
+                onChange={(e) => handleInputChange('skills', e.target.value)}
                 className="min-h-[150px]"
             />
-        </div>
+          </div>
 
-        {/* Campo Cidade (Select) */}
-        <div className="space-y-2">
-          <Label htmlFor="city">Cidade</Label>
-          <Select defaultValue={props.city}>
-            <SelectTrigger id="city">
-              <SelectValue placeholder="Selecione sua cidade" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              {/* Você pode preencher isso com dados reais mais tarde */}
-              <SelectItem value="recife">Recife</SelectItem>
-              <SelectItem value="olinda">Olinda</SelectItem>
-              <SelectItem value="jaboatao">Jaboatão dos Guararapes</SelectItem>
-              <SelectItem value="caruaru">Caruaru</SelectItem>
-              <SelectItem value="outra">Outra</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-
-        
-      
-        {/* Botão de Salvar */}
-        <div className="pt-4">
-            <Button 
-                type="submit" // Define o tipo como "submit" para o formulário
-                variant="destructive" // Usa a cor vermelha do tema
-                className="w-full bg-red-400 hover:bg-red-500"
+          {/* Campo Cidade */}
+          <div className="space-y-2">
+            <Label htmlFor="city">Cidade</Label>
+            <Select 
+              value={formData.city} 
+              onValueChange={(value) => handleInputChange('city', value)}
             >
-                Salvar alterações
+              <SelectTrigger id="city">
+                <SelectValue placeholder="Selecione sua cidade" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                <SelectItem value="recife">Recife</SelectItem>
+                <SelectItem value="olinda">Olinda</SelectItem>
+                <SelectItem value="jaboatao">Jaboatão dos Guararapes</SelectItem>
+                <SelectItem value="caruaru">Caruaru</SelectItem>
+                <SelectItem value="outra">Outra</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Botões de Ação */}
+          <div className="pt-4 space-y-3">
+            <Button 
+              type="submit"
+              variant="destructive" 
+              className="w-full bg-red-400 hover:bg-red-500"
+            >
+              Salvar alterações
             </Button>
-            </div>
+            <Button 
+              type="button"
+              variant="outline" 
+              className="w-full border-gray-400 text-gray-700 hover:bg-gray-50"
+              onClick={props.onCancel}
+            >
+              Cancelar
+            </Button>
+          </div>
 
-    </form>
-    </Card>
+        </form>
+      </Card>
     </div>
-
   );
 }
