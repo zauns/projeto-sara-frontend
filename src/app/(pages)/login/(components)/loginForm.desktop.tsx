@@ -4,7 +4,7 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { authSevice } from "@/services/authServices";
 
 const LoginFormDesktop: React.FC = () => {
-  const [cpf, setCpf] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
@@ -24,16 +24,16 @@ const LoginFormDesktop: React.FC = () => {
 
     try {
       // Simula o processo de login (substitua com sua chamada de API real posteriormente)
-      const data = await authSevice.login(cpf,password);
-      console.log("Formulário enviado:", { cpf, password, rememberMe });
+      const data = await authSevice.login(email, password);
+      console.log("Formulário enviado:", { cpf: email, password, rememberMe });
 
       // Dados de usuário e token simulados (substitua com a resposta real da API)
       const userdata = {
         id: data.user.sub,
-        name: data.user.name || "Usuário",
-        email: data.user.email,
+        name: data.user.sub || "Usuário",
+        email: data.user.sub,
         // cpf: cpf.includes("@") ? "" : cpf, cpf será integrado posteriormente
-        role: data.user.scope || "user" ,
+        role: data.user.scope,
       };
 
       login(userdata, data.token, rememberMe);
@@ -42,7 +42,7 @@ const LoginFormDesktop: React.FC = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Login error:", error);
-      setErrorMessage("CPF ou senha inválidos. Tente novamente.");
+      setErrorMessage(error.message || "Email ou senha inválidos. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -65,18 +65,18 @@ const LoginFormDesktop: React.FC = () => {
           <div className="flex flex-col gap-1">
             <div className="flex flex-col gap-2">
               <label
-                htmlFor="cpf"
+                htmlFor="email"
                 className="text-sm text-[#21272A] leading-[1.4]"
               >
-                CPF
+                Email
               </label>
               <input
-                id="cpf"
-                type="text"
-                placeholder="Digite seu CPF"
-                value={cpf}
+                id="email"
+                type="email"
+                placeholder="Digite seu E-mail"
+                value={email}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setCpf(e.target.value)
+                  setEmail(e.target.value)
                 }
                 className="w-full px-4 py-3 text-base text-[#697077] bg-white border-b border-[#C1C7CD] focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]"
               />
@@ -171,6 +171,12 @@ const LoginFormDesktop: React.FC = () => {
             )}
           </div>
 
+          {errorMessage && ( //TODO: mensagem de erro, favor alguém revisa as cores
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {errorMessage}
+            </div>
+          )}
+
           {/* Botão de Login */}
           <button
             type="submit"
@@ -199,11 +205,6 @@ const LoginFormDesktop: React.FC = () => {
           Não possui uma conta? Siga as etapas e cadastre-se
         </span>
 
-        { errorMessage && ( //TODO: mensagem de erro, favor alguém revisa as cores
-         <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-           {errorMessage}
-         </div>
-        )}
       </div>
     </div>
   );

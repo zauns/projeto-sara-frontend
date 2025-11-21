@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { authSevice } from "@/services/authServices";
 
 const LoginForm: React.FC = () => {
-  const [cpf, setCpf] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { login } = useAuth();
 
@@ -19,26 +21,29 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       // Simula o processo de login (substitua com sua chamada de API real posteriormente)
-      console.log("Formulário enviado:", { cpf, password, rememberMe });
+      const data = await authSevice.login(email, password);
+      console.log("Formulário enviado:", { cpf: email, password, rememberMe });
 
       // Dados de usuário e token simulados (substitua com a resposta real da API)
-      const mockUserData = {
-        id: "123",
-        name: "João Silva",
-        email: cpf.includes("@") ? cpf : "user@example.com",
-        cpf: cpf.includes("@") ? "" : cpf,
-        role: "user",
+      const userData = {
+        id: data.user.sub,
+        name: data.user.sub,
+        email: data.user.sub,
+        //cpf: cpf.includes("@") ? "" : cpf,
+        role: data.user.scope,
       };
 
-      const mockToken = "mock-jwt-token-" + Date.now();
+      login(userData, data.token, rememberMe);
+      //const mockToken = "mock-jwt-token-" + Date.now();
 
       // Usa a função de login do AuthContext
-      login(mockUserData, mockToken, rememberMe);
     } catch (error) {
       console.error("Login error:", error);
+      setErrorMessage("CPF ou senha inválidos. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -79,18 +84,18 @@ const LoginForm: React.FC = () => {
           <div className="flex flex-col gap-1">
             <div className="flex flex-col gap-2">
               <label
-                htmlFor="cpf"
+                htmlFor="email"
                 className="text-sm text-[#21272A] leading-[1.4]"
               >
-                CPF
+                Email
               </label>
               <input
-                id="cpf"
-                type="text"
-                placeholder="Digite seu CPF"
-                value={cpf}
+                id="email"
+                type="email"
+                placeholder="Digite seu Email"
+                value={email}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setCpf(e.target.value)
+                  setEmail(e.target.value)
                 }
                 className="w-full px-4 py-3 text-base text-[#697077] bg-white border-b border-[#C1C7CD] focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]"
               />
@@ -185,6 +190,12 @@ const LoginForm: React.FC = () => {
             )}
           </div>
 
+          {errorMessage && (
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {errorMessage}
+            </div>
+          )}
+
           {/* Botão de Login */}
           <button
             type="submit"
@@ -212,6 +223,7 @@ const LoginForm: React.FC = () => {
         <span className="text-sm text-[#001D6C] leading-[1.4] text-left">
           Não possui uma conta? Siga as etapas e cadastre-se
         </span>
+
       </div>
     </div>
   );

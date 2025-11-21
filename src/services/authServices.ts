@@ -2,17 +2,24 @@ const API_URL = "http://localhost:8080";
 
 import { jwtDecode } from "jwt-decode";
 
+export interface UserTokenPayload {
+    sub: string;    //e-mail ou username
+    scope: string;  //roles da conta
+    userId: string; //id
+    exp: number;
+    iss: string;
+}
+
 export interface LoginResponse {
     token: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    user: any; //ainda avaliar esta linha
+    user: UserTokenPayload; //ainda avaliar esta linha
 }
 
 export const authSevice = {
-    async login(cpf: string, password: string): Promise<LoginResponse> {
+    async login(email: string, password: string): Promise<LoginResponse> {
         try {
             const payload = {
-                username: cpf,
+                username: email,
                 password: password //no back end vamos alterar os dados enviados
                 // o back envia e-mail e senha mas o front espera cpf e senha
             };
@@ -26,12 +33,15 @@ export const authSevice = {
 
             if (!response.ok) {
                 const errorText = await response.text();
+                if (response.status == 401 || response.status == 403 ) {
+                    throw new Error(errorText || "Credenciais inválidas ou conta pendente.");
+                }
                 throw new Error(errorText || "Falha na autenticação");
             }
 
             const token = await response.text();
 
-            const decodeUser = jwtDecode(token);
+            const decodeUser = jwtDecode<UserTokenPayload>(token);
 
             return {
                 token,
