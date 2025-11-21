@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { authSevice } from "@/services/authServices";
 
 const LoginFormDesktop: React.FC = () => {
   const [cpf, setCpf] = useState<string>("");
@@ -8,6 +9,7 @@ const LoginFormDesktop: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { login } = useAuth();
 
@@ -18,26 +20,29 @@ const LoginFormDesktop: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       // Simula o processo de login (substitua com sua chamada de API real posteriormente)
+      const data = await authSevice.login(cpf,password);
       console.log("Formulário enviado:", { cpf, password, rememberMe });
 
       // Dados de usuário e token simulados (substitua com a resposta real da API)
-      const mockUserData = {
-        id: "123",
-        name: "João Silva",
-        email: cpf.includes("@") ? cpf : "user@example.com",
-        cpf: cpf.includes("@") ? "" : cpf,
-        role: "user",
+      const userdata = {
+        id: data.user.sub,
+        name: data.user.name || "Usuário",
+        email: data.user.email,
+        // cpf: cpf.includes("@") ? "" : cpf, cpf será integrado posteriormente
+        role: data.user.scope || "user" ,
       };
 
-      const mockToken = "mock-jwt-token-" + Date.now();
+      login(userdata, data.token, rememberMe);
 
-      // Usa a função de login do AuthContext
-      login(mockUserData, mockToken, rememberMe);
-    } catch (error) {
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       console.error("Login error:", error);
+      setErrorMessage("CPF ou senha inválidos. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -193,6 +198,12 @@ const LoginFormDesktop: React.FC = () => {
         <span className="text-sm text-[#001D6C] leading-[1.4] text-left">
           Não possui uma conta? Siga as etapas e cadastre-se
         </span>
+
+        { errorMessage && ( //TODO: mensagem de erro, favor alguém revisa as cores
+         <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+           {errorMessage}
+         </div>
+        )}
       </div>
     </div>
   );
