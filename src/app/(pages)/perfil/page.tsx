@@ -1,38 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Header } from "@/components/core/header";
 import { ProfilePhotoCard } from "@/components/core/profile-photo-card";
 import { UserDetailsCard } from "@/components/core/user-details-card";
 import { CurriculumDisplay } from "@/components/core/curriculum-display";
 import { CurriculumForm } from "@/components/core/curriculum-form";
 import { CurriculumData } from "@/types/curriculum";
+import { useAuth } from "@/contexts/AuthContext";
+
+
+const API_URL = "http://localhost:8080";
+
 
 export default function ProfilePage() {
-  // Estado para dados do usuário (dados fictícios)
+  const { user, token, logout } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [userDetails, setUserDetails] = useState({
-    firstName: "Maria",
-    lastName: "Souza",
-    phone: "(81) 98888-7777",
-    email: "maria.souza@email.com",
-    address: "Rua das Flores, 123, Recife",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    address: "",
   });
 
-  // Estado para dados do currículo (dados fictícios iniciais)
   const [curriculum, setCurriculum] = useState<CurriculumData>({
-    fullName: "Maria Eduarda de Souza",
-    phoneNumber: "(81) 98888-7777",
-    email: "maria.souza.profissional@email.com",
-    objective:
-      "Busco uma oportunidade desafiadora onde eu possa aplicar meus conhecimentos em desenvolvimento front-end e contribuir para o crescimento da empresa.",
-    experience:
-      "Desenvolvedora Front-end Júnior\nEmpresa Exemplo LTDA (2023 - Presente)\n- Desenvolvimento e manutenção de interfaces web com React e Next.js.\n- Colaboração em equipe para implementar novas funcionalidades.\n\nEstagiária de Desenvolvimento Web\nEmpresa Teste LTDA (2022 - 2023)\n- Auxílio no desenvolvimento de componentes reutilizáveis.\n- Correção de bugs e melhorias em interfaces existentes.",
-    education:
-      "Análise e Desenvolvimento de Sistemas - Universidade Exemplo (Concluído em 2023)",
-    city: "recife",
-    skills:
-      "React, Next.js, TypeScript, JavaScript, HTML, CSS, TailwindCSS, Git, Figma.",
+    fullName: "",
+    phoneNumber: "",
+    email: "",
+    objective: "Busco uma oportunidade desafiadora...",
+    experience: "Experiência simulada...",
+    education: "Educação simulada...",
+    city: "Recife",
+    skills: "React, Java, Spring Boot",
   });
+  // Estado para dados do currículo (dados fictícios iniciais)
+
 
   // Estado para controle de edição do currículo
   const [isEditingCurriculum, setIsEditingCurriculum] = useState(false);
@@ -41,6 +44,66 @@ export default function ProfilePage() {
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | undefined>(
     undefined,
   );
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!user || !token) return;
+
+      try {
+        let endpoint = "/api/user";
+        if (user.role == "ROLE_EMPRESA") endpoint = "/empresa";
+        if (user.role == "ROLE_SECRETARIA") endpoint = "/secretaria";
+        if (user.role == "ROLE_ADMIN") endpoint = "/administrador";
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const userId = user.userId || user.id;
+
+        const url = `${API_URL}${endpoint}/${user.id}`;
+
+        console.log(`Buscando dados em: ${url}`);
+
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          const names = (data.nome || "").split(" ");
+          const firstName = names[0] || "";
+          const lastName = names.slice(1).join(" ") || "";
+
+          setUserDetails({
+            firstName: firstName,
+            lastName: lastName,
+            phone: data.telefone || "",
+            email: data.email || "",
+            address: data.endereco || "",
+          });
+
+          setCurriculum((prev) => ({
+            ...prev,
+            fullName: data.nome,
+            email: data.email,
+            phoneNumber: data.telefone
+          }));
+        } else {
+          console.error("Erro ao buscar o perfil:", response.status);
+          const errorText = await response.text();
+          console.error("Detalhes do erro:", errorText);
+        }
+      } catch (error) {
+        console.error("Erro de conexão:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUserData();
+  }, [user, token]);
 
   // Handler para salvar currículo (dados locais)
   const handleCurriculumSubmit = (formData: CurriculumData) => {
@@ -57,9 +120,16 @@ export default function ProfilePage() {
 
   // Handler para logout
   const handleLogout = () => {
-    console.log("Fazendo logout...");
-    // Adicionar lógica real de logout aqui
+    if (logout) logout();
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF1EA]">
+        <p className="text-[#F55F58] font-bold">Carregando perfil...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FFF1EA]">
