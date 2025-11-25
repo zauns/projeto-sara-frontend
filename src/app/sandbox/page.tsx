@@ -8,6 +8,7 @@ import { CurriculumForm } from '@/components/core/curriculum-form';
 import { CurriculumDisplay } from '@/components/core/curriculum-display';
 import { CompanyRegistrationForm } from '@/components/core/company-registration-form';
 import { CompanyDetailsCard } from '@/components/core/company-details-card';
+import { SecretariaRegistrationForm } from '@/components/core/secretaria-registration-form';
 
 
 export default function SandboxPage() {
@@ -45,8 +46,8 @@ export default function SandboxPage() {
       />
       */}
 
-      <ProfilePhotoCard />
-      <CompanyDetailsCard />
+      {/*<ProfilePhotoCard />*/}
+      {/*<CompanyDetailsCard />*/}
 
       {/*<UserDetailsCard />*/}
 
@@ -56,6 +57,9 @@ export default function SandboxPage() {
       {/*<CurriculumDisplay />*/}
 
       {/*<CompanyRegistrationForm />*/}
+      
+      <SecretariaRegistrationForm />
+
     </div>
   );
 }
