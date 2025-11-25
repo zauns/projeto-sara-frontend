@@ -1,46 +1,41 @@
-const API_URL = "http://localhost:8080";
-
+import { api } from "../api/axios";
 import { jwtDecode } from "jwt-decode";
+import { AxiosError } from "axios";
 
 export interface UserTokenPayload {
-    sub: string;    //e-mail ou username
-    scope: string;  //roles da conta
-    userId: string; //id
+    sub: string;    // e-mail ou username
+    scope: string;  // roles da conta
+    userId: string; // id
     exp: number;
     iss: string;
 }
 
 export interface LoginResponse {
     token: string;
-    user: UserTokenPayload; //ainda avaliar esta linha
+    user: UserTokenPayload;
 }
 
-export const authSevice = {
-    async login(email: string, password: string): Promise<LoginResponse> {
+export interface LoginCredentials {
+    email: string; // O front recebe email
+    password: string;
+}
+
+export const authService = {
+    async login(credentials: LoginCredentials): Promise<LoginResponse> {
         try {
+            // Adaptação dos dados: Front (email) -> Back (espera 'username')
             const payload = {
-                username: email,
-                password: password //no back end vamos alterar os dados enviados
-                // o back envia e-mail e senha mas o front espera cpf e senha
+                username: credentials.email,
+                password: credentials.password 
             };
-            const response = await fetch(`${API_URL}/token`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                if (response.status == 401 || response.status == 403 ) {
-                    throw new Error(errorText || "Credenciais inválidas ou conta pendente.");
-                }
-                throw new Error(errorText || "Falha na autenticação");
-            }
-
-            const token = await response.text();
-
+            const response = await api.post<string>("/token", payload); // Axios parseia JSON auto, mas endpoint retorna token comos string
+            
+            // Se o backend retorna o token como string pura (text/plain)
+            const token = response.data;
+            
+            // Se o backend retornasse JSON { token: "..." }, seria response.data.token
+            
             const decodeUser = jwtDecode<UserTokenPayload>(token);
 
             return {
@@ -48,7 +43,15 @@ export const authSevice = {
                 user: decodeUser
             };
         } catch (error) {
-            console.error("Erro na requisição do login", error);
+            if (error instanceof AxiosError) {
+                // Tratamento específico de erro do Axios
+                const message = error.response?.data || error.message;
+                if (error.response?.status === 401 || error.response?.status === 403) {
+                     throw new Error("Credenciais inválidas ou conta pendente.");
+                }
+                throw new Error(typeof message === 'string' ? message : "Falha na autenticação");
+            }
+            console.error("Erro inesperado no login", error);
             throw error;
         }
     },

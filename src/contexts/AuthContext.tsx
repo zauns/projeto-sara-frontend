@@ -9,24 +9,21 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { tokenUtils, userDataUtils } from "../utils/cookies";
-
-// Substituir pelos campos reais após integração
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  cpf?: string;
-  role?: string;
-}
+import { UserProfile, userService } from "../services/userServices";
+import { UserTokenPayload } from "../services/authServices";
 
 interface AuthContextType {
-  user: User | null;
+  user: UserProfile | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: User, token: string, rememberMe?: boolean) => void;
+  login: (
+    tokenPayload: UserTokenPayload,
+    token: string,
+    rememberMe?: boolean,
+  ) => void;
   logout: () => void;
-  updateUser: (userData: Partial<User>) => void;
+  updateUser: (userData: Partial<UserProfile>) => void;
 }
 
 // Criar Contexto
@@ -47,7 +44,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -58,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         // Verifica token e dados do usuário (tanto localStorage quanto sessionStorage)
         const storedToken = tokenUtils.getAuthToken();
-        const storedUser = userDataUtils.getUserData() as User | null;
+        const storedUser = userDataUtils.getUserData() as UserProfile | null;
 
         if (storedToken && storedUser) {
           setToken(storedToken);
@@ -78,21 +75,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Função de login com suporte a Lembrar de mim
-  const login = (
-    userData: User,
+  const login = async (
+    tokenPayload: UserTokenPayload,
     authToken: string,
     rememberMe: boolean = false,
   ) => {
     try {
-      // Define o estado
-      setUser(userData);
+      // 1. Armazena o token primeiro para chamadas de API autenticadas
+      tokenUtils.setAuthToken(authToken, rememberMe);
       setToken(authToken);
 
-      // Armazena o token com expiração apropriada
-      tokenUtils.setAuthToken(authToken, rememberMe);
+      // 2. Busca os dados completos do perfil do usuário
+      const userProfile = await userService.getProfile(tokenPayload.userId);
 
-      // Armazena dados do usuário com tipo de armazenamento apropriado
-      userDataUtils.setUserData(userData, rememberMe);
+      // 3. Define o estado e armazena os dados do usuário
+      setUser(userProfile);
+      userDataUtils.setUserData(userProfile, rememberMe);
 
       // Armazena o horário de login para cálculo de tempo restante
       if (rememberMe) {
@@ -103,6 +101,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       router.push("/home");
     } catch (error) {
       console.error("Error during login:", error);
+      // Em caso de erro ao buscar perfil, desloga para evitar estado inconsistente
+      logout();
     }
   };
 
@@ -128,7 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Atualiza dados do usuário
-  const updateUser = (userData: Partial<User>) => {
+  const updateUser = (userData: Partial<UserProfile>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);

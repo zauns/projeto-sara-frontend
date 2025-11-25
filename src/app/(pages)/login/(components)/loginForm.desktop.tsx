@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../../../../contexts/AuthContext";
-import { authSevice } from "@/services/authServices";
+import { authService, LoginCredentials } from "@/services/authServices";
 
 const LoginFormDesktop: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -10,6 +10,10 @@ const LoginFormDesktop: React.FC = () => {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
 
   const { login } = useAuth();
 
@@ -19,30 +23,38 @@ const LoginFormDesktop: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
     setErrorMessage(null);
+
+    const errors: { email?: string; password?: string } = {};
+    if (!email.trim()) {
+      errors.email = "O campo de e-mail é obrigatório.";
+    }
+    if (!password.trim()) {
+      errors.password = "O campo de senha é obrigatório.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
+    setIsLoading(true);
 
     try {
       // Simula o processo de login (substitua com sua chamada de API real posteriormente)
-      const data = await authSevice.login(email, password);
-      console.log("Formulário enviado:", { cpf: email, password, rememberMe });
+      const credentials: LoginCredentials = { email, password };
+      const data = await authService.login(credentials);
+      console.log("Formulário enviado:", { email, password, rememberMe });
 
-      // Dados de usuário e token simulados (substitua com a resposta real da API)
-      const userdata = {
-        id: data.user.sub,
-        name: data.user.sub || "Usuário",
-        email: data.user.sub,
-        // cpf: cpf.includes("@") ? "" : cpf, cpf será integrado posteriormente
-        role: data.user.scope,
-      };
+      login(data.user, data.token, rememberMe);
 
-      login(userdata, data.token, rememberMe);
-
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Login error:", error);
-      setErrorMessage(error.message || "Email ou senha inválidos. Tente novamente.");
+      setErrorMessage(
+        error.message || "Email ou senha inválidos. Tente novamente.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -75,11 +87,19 @@ const LoginFormDesktop: React.FC = () => {
                 type="email"
                 placeholder="Digite seu E-mail"
                 value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setEmail(e.target.value)
-                }
-                className="w-full px-4 py-3 text-base text-[#697077] bg-white border-b border-[#C1C7CD] focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setEmail(e.target.value);
+                  if (formErrors.email) {
+                    setFormErrors((prev) => ({ ...prev, email: undefined }));
+                  }
+                }}
+                className={`w-full px-4 py-3 text-base text-[#697077] bg-white border-b ${
+                  formErrors.email ? "border-red-500" : "border-[#C1C7CD]"
+                } focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]`}
               />
+              {formErrors.email && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+              )}
             </div>
           </div>
 
@@ -98,10 +118,18 @@ const LoginFormDesktop: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Digite sua senha"
                   value={password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setPassword(e.target.value)
-                  }
-                  className="w-full px-4 py-3 pr-12 text-base text-[#697077] bg-white border-b border-[#C1C7CD] focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setPassword(e.target.value);
+                    if (formErrors.password) {
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        password: undefined,
+                      }));
+                    }
+                  }}
+                  className={`w-full px-4 py-3 pr-12 text-base text-[#697077] bg-white border-b ${
+                    formErrors.password ? "border-red-500" : "border-[#C1C7CD]"
+                  } focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]`}
                 />
                 <button
                   type="button"
@@ -116,6 +144,11 @@ const LoginFormDesktop: React.FC = () => {
                   )}
                 </button>
               </div>
+              {formErrors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
           </div>
 
@@ -204,7 +237,6 @@ const LoginFormDesktop: React.FC = () => {
         <span className="text-sm text-[#001D6C] leading-[1.4] text-left">
           Não possui uma conta? Siga as etapas e cadastre-se
         </span>
-
       </div>
     </div>
   );
