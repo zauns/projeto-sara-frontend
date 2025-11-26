@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // 1. Armazena o token primeiro para chamadas de API autenticadas
       tokenUtils.setAuthToken(authToken, rememberMe);
       setToken(authToken);
-      
+      console.log(tokenPayload)
       switch (tokenPayload.scope) {
         case "ADMIN":
           setUser(await userService.getProfileAdmin(tokenPayload.userId));
