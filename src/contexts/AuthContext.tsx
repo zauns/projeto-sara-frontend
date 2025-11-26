@@ -86,16 +86,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setToken(authToken);
       console.log(tokenPayload)
       switch (tokenPayload.scope) {
-        case "ADMIN":
+        case "ROLE_ADMIN":
           setUser(await userService.getProfileAdmin(tokenPayload.userId));
           break;
-        case "USER":
+        case "ROLE_SUPER_ADMIN":
+          setUser(await userService.getProfileAdmin(tokenPayload.userId));
+          break;
+        case "ROLE_USER":
           setUser(await userService.getProfileUser(tokenPayload.userId));
           break;
-        case "SECRETARIA":
+        case "ROLE_SECRETARIA":
           setUser(await userService.getProfileSecretaria(tokenPayload.userId));
           break;
-        case "EMPRESA":
+        case "ROLE_EMPRESA":
           setUser(await userService.getProfileEmpresa(tokenPayload.userId));
           break;
         default:
