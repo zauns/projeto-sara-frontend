@@ -22,6 +22,7 @@ export function CompanyRegistrationForm() {
     cnpj: "",
     biografia: "",
     links: "",
+    is_validada: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
