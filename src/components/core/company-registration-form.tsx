@@ -13,7 +13,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "../ui/textarea";
-import { CompanyRegistrationSuccessDialog } from './company-registration-dialogue';
+import { SuccessDialog } from './sucess-dialogue';
 
 
 //Formulário principal para o cadastro de novas empresas,
@@ -191,11 +191,14 @@ export function CompanyRegistrationForm() {
 
             </form>
 
-            {/* Renderizar o Diálogo */}
-            <CompanyRegistrationSuccessDialog
+            {/* Diálogo de sucesso */}
+            <SuccessDialog
                 isOpen={showSuccessDialog}
                 onClose={() => setShowSuccessDialog(false)}
-                onGoToLogin={handleGoToLogin}
+                title="Cadastro Solicitado!"
+                description="Sua solicitação foi recebida. Entraremos em contato em breve para informar os próximos passos."
+                buttonText="Voltar para Login"
+                onAction={() => handleGoToLogin("/login")}
             />
         </div>
     );

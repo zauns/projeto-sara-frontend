@@ -4,17 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check } from "lucide-react";
 
-type CompanyRegistrationSuccessDialogProps = {
+type SuccessDialogProps = {
     isOpen: boolean;
     onClose: () => void;
-    onGoToLogin: (path: string) => void;
+    /* Título do diálogo (ex: "Cadastro Realizado!") */
+    title: string;
+    /* Descrição ou mensagem de sucesso */
+    description: string;
+    /* Texto do botão de ação (ex: "Voltar para Login") */
+    buttonText?: string;
+    /* Ação ao clicar no botão (ex: redirecionar) */
+    onAction: () => void;
 };
 
-export function CompanyRegistrationSuccessDialog({
+export function SuccessDialog({
     isOpen,
     onClose,
-    onGoToLogin,
-}: CompanyRegistrationSuccessDialogProps) {
+    title,
+    description,
+    buttonText = "Continuar", // Valor padrão
+    onAction,
+}: SuccessDialogProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px] bg-white p-6 text-center">
@@ -24,10 +34,10 @@ export function CompanyRegistrationSuccessDialog({
                     </div>
 
                     <DialogTitle className="text-2xl font-bold mt-4">
-                        Cadastro Solicitado!
+                        {title}
                     </DialogTitle>
                     <DialogDescription className="text-gray-600 mt-2">
-                        Sua solicitação foi recebida. Entraremos em contato em breve para informar os próximos passos.
+                        {description}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -36,9 +46,9 @@ export function CompanyRegistrationSuccessDialog({
                         type="button"
                         variant="outline"
                         className="w-full text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600"
-                        onClick={() => onGoToLogin("/login")}
+                        onClick={onAction}
                     >
-                        Voltar para Login
+                        {buttonText}
                     </Button>
                 </div>
             </DialogContent>

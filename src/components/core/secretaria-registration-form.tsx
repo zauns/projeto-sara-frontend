@@ -12,7 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { CompanyRegistrationSuccessDialog } from '@/components/core/company-registration-dialogue';
+import { SuccessDialog } from '@/components/core/sucess-dialogue';
 
 export function SecretariaRegistrationForm() {
 
@@ -136,10 +136,13 @@ export function SecretariaRegistrationForm() {
 
             </form>
 
-            <CompanyRegistrationSuccessDialog
+            <SuccessDialog
                 isOpen={showSuccessDialog}
                 onClose={() => setShowSuccessDialog(false)}
-                onGoToLogin={handleGoToLogin}
+                title="Cadastro Realizado!"
+                description="Sua conta de secretaria foi criada com sucesso. Você será redirecionado para o login."
+                buttonText="Voltar para Login"
+                onAction={() => handleGoToLogin("/login")}
             />
         </div>
     );

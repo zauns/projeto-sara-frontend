@@ -14,8 +14,8 @@ export function SecretariaLoginForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Login de Secretaria enviado");
-    // Redirecionar para o Painel Administrativo
-    router.push("/admin/dashboard"); 
+    // Redirecionar para página da secretaria (trocar para o link real depois)
+    router.push("/secretaria/dashboard"); 
   };
 
   return (
@@ -74,8 +74,6 @@ export function SecretariaLoginForm() {
           Acessar Sistema
         </Button>
 
-        {/* Opcional: Cadastro de Secretaria geralmente não é público, 
-            mas se quiser manter o link para o formulário que fizemos: */}
         <div className="text-center text-sm text-gray-600">
           Novo servidor?{" "}
           <a href="/register/secretaria" className="font-bold text-red-500 hover:text-red-600">

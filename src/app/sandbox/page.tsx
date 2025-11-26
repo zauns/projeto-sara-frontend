@@ -11,6 +11,7 @@ import { CompanyDetailsCard } from '@/components/core/company-details-card';
 import { SecretariaRegistrationForm } from '@/components/core/secretaria-registration-form';
 import { CompanyLoginForm } from '@/components/core/company-login-form';
 import { SecretariaLoginForm } from '@/components/core/secretaria-login-form';
+import { UserRegistrationForm } from '@/components/core/usuaria-registration-form';
 
 
 export default function SandboxPage() {
@@ -64,6 +65,8 @@ export default function SandboxPage() {
 
         <CompanyLoginForm />
         <SecretariaLoginForm />
+
+        <UserRegistrationForm />
     </div>
   );
 }
