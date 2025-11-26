@@ -1,5 +1,5 @@
 "use client";
-
+import { UserProfile } from "../services/userServices";
 // Utilitários de Cookie para gerenciamento seguro de token com suporte a Lembrar de mim
 export const cookieUtils = {
   // Define um cookie com expiração opcional e configurações de segurança
@@ -119,7 +119,7 @@ export const tokenUtils = {
 // Utilitários de dados do usuário com suporte a Lembrar de mim (para dados não sensíveis)
 export const userDataUtils = {
   // Define dados do usuário com consideração de Lembrar de mim
-  setUserData: (userData: object, rememberMe: boolean = false) => {
+  setUserData: (userData:  UserProfile | null, rememberMe: boolean = false) => {
     if (typeof window === "undefined") return; // Verificação de segurança SSR
 
     try {

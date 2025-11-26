@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-// props/dados do curriculo
-type CurriculumDataProps = {
+// Props para visualização do currículo
+interface CurriculumDisplayProps {
   fullName?: string;
   phoneNumber?: string;
   email?: string;
@@ -11,32 +11,27 @@ type CurriculumDataProps = {
   education?: string;
   city?: string;
   skills?: string;
-};
+  onEdit?: () => void; // Callback para iniciar edição
+}
 
-// placeholder de dados do formulário (lore ipsum)
-const placeholderData: Required<CurriculumDataProps> = {
+// Dados placeholder (fallback)
+const placeholderData: Required<Omit<CurriculumDisplayProps, 'onEdit'>> = {
   fullName: "Nome Completo da Silva",
   phoneNumber: "(81) 99999-8888",
   email: "email.exemplo@provedor.com",
   city: "Recife",
-  objective: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-  experience: "Empresa X (2023 - Presente)\n- Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n- Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n\nEmpresa Y (2021 - 2023)\n- Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  objective: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  experience: "Empresa X (2023 - Presente)\n- Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n\nEmpresa Y (2021 - 2023)\n- Excepteur sint occaecat cupidatat non proident.",
   education: "Graduação em Análise e Desenvolvimento de Sistemas - Faculdade Exemplo (2020 - 2023)",
   skills: "React, Next.js, TypeScript, TailwindCSS, Node.js, Git, SQL."
 };
 
-
-// Visualização do curriculo
-export function CurriculumDisplay(props: CurriculumDataProps) {
+export function CurriculumDisplay(props: CurriculumDisplayProps) {
   const data = { ...placeholderData, ...props };
 
   return (
-    // Wrapper principal
     <div className="p-4">
-      {/* Card principal */}
       <Card className="bg-white shadow-md border-gray-200">
-        
-        {/* Div interna para espaçamento */}
         <div className="w-full md:p-6 space-y-6 p-4">
           
           {/* Seção de Contato */}
@@ -99,12 +94,14 @@ export function CurriculumDisplay(props: CurriculumDataProps) {
             <Button 
               variant="destructive" 
               className="w-full bg-red-400 hover:bg-red-500" 
+              onClick={props.onEdit}
             >
               Editar Currículo
             </Button>
             <Button 
               variant="outline" 
               className="w-full border-red-400 text-red-400 hover:bg-red-50 hover:text-red-500"
+              onClick={() => alert("Funcionalidade de download será implementada com backend")}
             >
               Baixar PDF
             </Button>
