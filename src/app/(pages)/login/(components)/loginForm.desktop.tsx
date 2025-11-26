@@ -42,7 +42,6 @@ const LoginFormDesktop: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Simula o processo de login (substitua com sua chamada de API real posteriormente)
       const credentials: LoginCredentials = { email, password };
       const data = await authService.login(credentials);
       console.log("Formulário enviado:", { email, password, rememberMe });

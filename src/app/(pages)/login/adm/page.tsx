@@ -101,13 +101,13 @@ export default function AdminLoginPage() {
             {/* Campo CPF / Login */}
             <div className="flex flex-col gap-2">
               <label
-                htmlFor="cpf"
+                htmlFor="email"
                 className="text-sm text-[#21272A] leading-[1.4] font-medium"
               >
-                CPF ou E-mail
+                E-mail
               </label>
               <input
-                id="cpf"
+                id="email"
                 type="text"
                 placeholder="Digite seu acesso"
                 value={email}

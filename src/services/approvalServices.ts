@@ -4,7 +4,7 @@ import { UserProfile } from "./userServices";
 export const approvalService = {
   async getPendingCompanies(): Promise<UserProfile[]> {
     try {
-      const response = await api.get<UserProfile[]>("/empresas/pendentes");
+      const response = await api.get<UserProfile[]>("/empresa/pendentes");
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar empresas pendentes", error);
@@ -23,7 +23,7 @@ export const approvalService = {
 
   async getPendingSecretaries(): Promise<UserProfile[]> {
     try {
-      const response = await api.get<UserProfile[]>("/secretarias/pendentes");
+      const response = await api.get<UserProfile[]>("/secretaria/pendentes");
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar secretarias pendentes", error);
