@@ -16,7 +16,7 @@ export const userService = {
   async getProfile(id: string): Promise<UserProfile> {
     try {
       // O endpoint real pode ser /users/{id} ou similar
-      const response = await api.get<UserProfile>(`/${id}`);
+      const response = await api.get<UserProfile>(`/administrador/${id}`);
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar perfil do usuário", error);
