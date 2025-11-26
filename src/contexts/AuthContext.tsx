@@ -117,14 +117,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       switch (tokenPayload.scope) {
         case "ROLE_SUPER_ADMIN":
           router.push("/home/adm");
+          break;
         case "ROLE_ADMIN":
           router.push("/home/adm");
+          break;
         case "ROLE_USER":
           router.push("/home");
+          break;
         case "ROLE_SECRETARIA":
           router.push("/home");
+          break;
         case "ROLE_EMPRESA":
           router.push("/home");
+          break;
         default:
           throw new Error("Invalid role");
       }
