@@ -9,6 +9,8 @@ import { CurriculumDisplay } from '@/components/core/curriculum-display';
 import { CompanyRegistrationForm } from '@/components/core/company-registration-form';
 import { CompanyDetailsCard } from '@/components/core/company-details-card';
 import { SecretariaRegistrationForm } from '@/components/core/secretaria-registration-form';
+import { CompanyLoginForm } from '@/components/core/company-login-form';
+import { SecretariaLoginForm } from '@/components/core/secretaria-login-form';
 
 
 export default function SandboxPage() {
@@ -58,8 +60,10 @@ export default function SandboxPage() {
 
       {/*<CompanyRegistrationForm />*/}
       
-      <SecretariaRegistrationForm />
+      {/* <SecretariaRegistrationForm /> */}
 
+        <CompanyLoginForm />
+        <SecretariaLoginForm />
     </div>
   );
 }
