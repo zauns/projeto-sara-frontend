@@ -13,7 +13,7 @@ export interface UserProfile {
 }
 
 export const userService = {
-  async getProfile(id: string): Promise<UserProfile> {
+  async getProfileAdmin(id: string): Promise<UserProfile> {
     try {
       // O endpoint real pode ser /users/{id} ou similar
       const response = await api.get<UserProfile>(`/administrador/${id}`);
@@ -23,6 +23,37 @@ export const userService = {
       throw error;
     }
   },
+  async getProfileUser(id: string): Promise<UserProfile> {
+    try {
+      // O endpoint real pode ser /users/{id} ou similar
+      const response = await api.get<UserProfile>(`/api/user/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário", error);
+      throw error;
+    }
+  },
+  async getProfileSecretaria(id: string): Promise<UserProfile> {
+    try {
+      // O endpoint real pode ser /users/{id} ou similar
+      const response = await api.get<UserProfile>(`/secretaria/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário", error);
+      throw error;
+    }
+  },
+  async getProfileEmpresa(id: string): Promise<UserProfile> {
+    try {
+      // O endpoint real pode ser /users/{id} ou similar
+      const response = await api.get<UserProfile>(`/empresa/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário", error);
+      throw error;
+    }
+  },
+  
 
   // Exemplo de método para atualizar perfil
   async updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {

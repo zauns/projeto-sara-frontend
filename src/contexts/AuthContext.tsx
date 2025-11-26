@@ -84,13 +84,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // 1. Armazena o token primeiro para chamadas de API autenticadas
       tokenUtils.setAuthToken(authToken, rememberMe);
       setToken(authToken);
-
-      // 2. Busca os dados completos do perfil do usuário
-      const userProfile = await userService.getProfile(tokenPayload.userId);
+      
+      switch (tokenPayload.scope) {
+        case "ADMIN":
+          setUser(await userService.getProfileAdmin(tokenPayload.userId));
+          break;
+        case "USER":
+          setUser(await userService.getProfileUser(tokenPayload.userId));
+          break;
+        case "SECRETARIA":
+          setUser(await userService.getProfileSecretaria(tokenPayload.userId));
+          break;
+        case "EMPRESA":
+          setUser(await userService.getProfileEmpresa(tokenPayload.userId));
+          break;
+        default:
+          throw new Error("Invalid role");
+      }
 
       // 3. Define o estado e armazena os dados do usuário
-      setUser(userProfile);
-      userDataUtils.setUserData(userProfile, rememberMe);
+      userDataUtils.setUserData(user, rememberMe);
 
       // Armazena o horário de login para cálculo de tempo restante
       if (rememberMe) {
@@ -98,7 +111,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Navega para a página home
-      router.push("/home");
+      switch (tokenPayload.scope) {
+        case "ADMIN":
+          router.push("/home/adm");
+        case "USER":
+          router.push("/home");
+        case "SECRETARIA":
+          router.push("/home");
+        case "EMPRESA":
+          router.push("/home");
+        default:
+          throw new Error("Invalid role");
+      }
     } catch (error) {
       console.error("Error during login:", error);
       // Em caso de erro ao buscar perfil, desloga para evitar estado inconsistente
