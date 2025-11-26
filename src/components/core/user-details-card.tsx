@@ -60,12 +60,7 @@ export function UserDetailsCard(props: UserDetailsCardProps) {
                 {/* Seção de Botões*/}
                 <div className="space-y-3 pt-4 border-t border-gray-200">
                     <div className="flex flex-col md:flex-row gap-3">
-                        <Button 
-                            variant="outline" 
-                            className="w-full border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600"
-                        >
-                            Adicionar currículo
-                        </Button>
+
                         <Button 
                             variant="outline"
                             className="w-full border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600"
