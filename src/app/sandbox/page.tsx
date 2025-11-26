@@ -1,3 +1,5 @@
+"use client"; // <--- 1. OBRIGATÓRIO: Transforma esta página em Client Component
+
 import { Header } from '@/components/core/header';
 import { SearchBar } from '@/components/core/search-bar';
 import { JobCard } from '@/components/core/job-card';
@@ -12,14 +14,20 @@ import { SecretariaRegistrationForm } from '@/components/core/secretaria-registr
 import { CompanyLoginForm } from '@/components/core/company-login-form';
 import { SecretariaLoginForm } from '@/components/core/secretaria-login-form';
 import { UserRegistrationForm } from '@/components/core/usuaria-registration-form';
-
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SandboxPage() {
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <div>
-      <Header />
-      {/*
-      <SearchBar />
+      <Header onLogout={() => handleLogout()} />
+      
+      {/* <SearchBar />
       <JobCard
         jobType="Tipo de vaga"
         title="Título da Vaga"
@@ -54,19 +62,20 @@ export default function SandboxPage() {
 
       {/*<UserDetailsCard />*/}
 
-
       {/*<CurriculumForm />*/}
 
       {/*<CurriculumDisplay />*/}
 
       {/*<CompanyRegistrationForm />*/}
-      
+
       {/* <SecretariaRegistrationForm /> */}
 
-        <CompanyLoginForm />
+      <div className="space-y-8 p-8 bg-gray-100">
+        <CompanyLoginForm />  
         <SecretariaLoginForm />
 
         <UserRegistrationForm />
+      </div>
     </div>
   );
 }
