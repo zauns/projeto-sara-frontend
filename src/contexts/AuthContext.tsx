@@ -113,7 +113,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (rememberMe) {
         localStorage.setItem("login_time", new Date().getTime().toString());
       }
-      console.log(tokenUtils.getAuthToken())
 
       // Navega para a página home
       switch (tokenPayload.scope) {
