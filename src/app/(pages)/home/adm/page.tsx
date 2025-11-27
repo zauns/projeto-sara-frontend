@@ -21,7 +21,6 @@ const AdminHome = () => {
   const [loadingApprovals, setLoadingApprovals] = useState(true);
 
   useEffect(() => {
-    console.log(tokenUtils.getAuthToken())
     const fetchPendingApprovals = async () => {
       try {
         const [companies, secretaries] = await Promise.all([
