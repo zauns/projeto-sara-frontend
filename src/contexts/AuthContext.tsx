@@ -1,5 +1,5 @@
 "use client";
-// Esqueleto genérico para AuthContext sem integração
+
 import React, {
   createContext,
   useContext,
@@ -15,15 +15,16 @@ import { UserTokenPayload } from "../services/authServices";
 interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
+  role: string | null; // Adicionado para expor a role no contexto
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (
     tokenPayload: UserTokenPayload,
     token: string,
     rememberMe?: boolean,
-  ) => void;
+  ) => Promise<void>;
   logout: () => void;
-  updateUser: (userData: Partial<UserProfile>) => void;
+  updateUser: (userData: Partial<UserProfile>) => Promise<void>; // Agora retorna uma Promise
 }
 
 // Criar Contexto
@@ -46,6 +47,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null); // Estado para armazenar a role
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -53,19 +55,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        // Verifica token e dados do usuário (tanto localStorage quanto sessionStorage)
+        // Verifica token e dados do usuário
         const storedToken = tokenUtils.getAuthToken();
         const storedUser = userDataUtils.getUserData() as UserProfile | null;
+        // Recupera a role salva (necessário persistir para sobreviver ao refresh)
+        const storedRole = localStorage.getItem("user_role"); 
 
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(storedUser);
+          if (storedRole) {
+            setRole(storedRole);
+          }
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
-        // Limpa dados potencialmente corrompidos
         tokenUtils.removeAuthToken();
         userDataUtils.removeUserData();
+        localStorage.removeItem("user_role");
       } finally {
         setIsLoading(false);
       }
@@ -81,62 +88,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     rememberMe: boolean = false,
   ) => {
     try {
-      console.log(tokenUtils.getAuthToken())
-      // 1. Armazena o token primeiro para chamadas de API autenticadas
+      // 1. Armazena o token
       tokenUtils.setAuthToken(authToken, rememberMe);
       setToken(authToken);
-      console.log(tokenPayload)
+      
+      // 2. Define a role baseada no payload
+      setRole(tokenPayload.scope);
+      localStorage.setItem("user_role", tokenPayload.scope); // Persiste a role
+
+      // 3. Busca o perfil baseado na role
+      let userProfile: UserProfile;
+
       switch (tokenPayload.scope) {
         case "ROLE_ADMIN":
-          setUser(await userService.getProfileAdmin(tokenPayload.userId));
-          break;
         case "ROLE_SUPER_ADMIN":
-          setUser(await userService.getProfileAdmin(tokenPayload.userId));
+          userProfile = await userService.getProfileAdmin(tokenPayload.userId);
           break;
         case "ROLE_USER":
-          setUser(await userService.getProfileUser(tokenPayload.userId));
+          userProfile = await userService.getProfileUser(tokenPayload.userId);
           break;
         case "ROLE_SECRETARIA":
-          setUser(await userService.getProfileSecretaria(tokenPayload.userId));
+          userProfile = await userService.getProfileSecretaria(tokenPayload.userId);
           break;
         case "ROLE_EMPRESA":
-          setUser(await userService.getProfileEmpresa(tokenPayload.userId));
+          userProfile = await userService.getProfileEmpresa(tokenPayload.userId);
           break;
         default:
           throw new Error("Invalid role");
       }
 
-      // 3. Define o estado e armazena os dados do usuário
-      userDataUtils.setUserData(user, rememberMe);
+      setUser(userProfile);
 
-      // Armazena o horário de login para cálculo de tempo restante
+      // 4. Armazena os dados do usuário
+      userDataUtils.setUserData(userProfile, rememberMe);
+
       if (rememberMe) {
         localStorage.setItem("login_time", new Date().getTime().toString());
       }
 
-      // Navega para a página home
+      // 5. Redirecionamento
       switch (tokenPayload.scope) {
         case "ROLE_SUPER_ADMIN":
-          router.push("/home/adm");
-          break;
         case "ROLE_ADMIN":
           router.push("/home/adm");
           break;
         case "ROLE_USER":
-          router.push("/home");
-          break;
-        case "ROLE_SECRETARIA":
-          router.push("/home");
+          router.push("/home/");
           break;
         case "ROLE_EMPRESA":
-          router.push("/home");
+          router.push("/home/empresa");
+          break;
+        case "ROLE_SECRETARIA":
+          router.push("/home/secretaria");
           break;
         default:
-          throw new Error("Invalid role");
+          router.push("/login");
       }
     } catch (error) {
       console.error("Error during login:", error);
-      // Em caso de erro ao buscar perfil, desloga para evitar estado inconsistente
       logout();
     }
   };
@@ -144,42 +153,68 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Função de logout
   const logout = () => {
     try {
-      // Limpa o estado
       setUser(null);
       setToken(null);
+      setRole(null);
 
-      // Limpa todos os dados armazenados (tokens e dados do usuário)
       tokenUtils.removeAuthToken();
       userDataUtils.removeUserData();
-
-      // Remove o horário de login
       localStorage.removeItem("login_time");
+      localStorage.removeItem("user_role"); // Remove a role persistida
 
-      // Navega para a página de login
       router.push("/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
-  // Atualiza dados do usuário
-  const updateUser = (userData: Partial<UserProfile>) => {
-    if (user) {
+  // Atualiza dados do usuário (Backend + Frontend)
+  const updateUser = async (userData: Partial<UserProfile>) => {
+    if (!user || !user.id) return;
+
+    try {
+      // 1. Identifica a role e chama o serviço específico de atualização
+      switch (role) {
+        case "ROLE_EMPRESA":
+          // Supõe-se que userService tenha esses métodos implementados
+          await userService.updateProfileEmpresa(user.id, userData as UserProfile);
+          break;
+        case "ROLE_SECRETARIA":
+          await userService.updateProfileSecretaria(user.id, userData as UserProfile);
+          break;
+        case "ROLE_ADMIN":
+        case "ROLE_SUPER_ADMIN":
+          // Exemplo caso existam métodos para admin
+          // await userService.updateProfileAdmin(user.id, userData as UserProfile);
+          break;
+        case "ROLE_USER":
+          // await userService.updateProfileUser(user.id, userData as UserProfile);
+          break;
+        default:
+          console.warn("Role não identificada para atualização específica, atualizando apenas localmente.");
+      }
+
+      // 2. Se a API respondeu ok, atualiza o estado local
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
-      // Atualiza dados do usuário preservando a preferência do tipo de armazenamento
+
+      // 3. Atualiza persistência local
       const currentStorageType = userDataUtils.getStorageType();
       const rememberMe = currentStorageType === "persistent";
       userDataUtils.setUserData(updatedUser, rememberMe);
+
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      throw error; // Re-lança o erro para que o componente de UI possa tratar (ex: mostrar toast de erro)
     }
   };
 
-  // Verifica se o usuário está autenticado
   const isAuthenticated = !!(user && token);
 
   const value: AuthContextType = {
     user,
     token,
+    role,
     isAuthenticated,
     isLoading,
     login,

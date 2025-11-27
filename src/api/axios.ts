@@ -22,7 +22,8 @@ const privateEndpoints: (string | RegExp)[] = [
   '/secretaria/pendentes',
   '/secretaria/aprovar',
   /^\/empresa\/[^/]+$/,
-  /^\/secretaria\/[^/]+$/, // /empresa/{id} - match exato com um ID
+  /^\/secretaria\/[^/]+$/,
+  '/api/user/create'// /empresa/{id} - match exato com um ID
 ];
 
 const matchesPrivateEndpoint = (url: string): boolean => {

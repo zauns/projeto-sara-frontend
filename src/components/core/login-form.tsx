@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import { authService, LoginCredentials } from "@/services/authServices";
 
 const LoginForm: React.FC = () => {
@@ -17,6 +18,7 @@ const LoginForm: React.FC = () => {
   }>({});
 
   const { login } = useAuth();
+  const router = useRouter();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -56,7 +58,6 @@ const LoginForm: React.FC = () => {
     // Container limpo: sem min-h-screen forçado, adapta-se ao pai.
     // Mantém w-full para ocupar a largura da coluna.
     <div className="w-full flex flex-col">
-      
       {/* Seção de Imagem (Apenas Mobile) */}
       <div
         className="w-full flex md:hidden items-center justify-center bg-white bg-cover bg-center relative mb-8"
@@ -230,9 +231,17 @@ const LoginForm: React.FC = () => {
         <div className="flex flex-col gap-4">
           <button
             type="button"
+            onClick={() => router.push("/cadastro/empresa")}
             className="w-full px-3 py-4 bg-transparent border-2 border-[#F55F58] text-[#F55F58] text-base font-medium leading-none hover:bg-[#F55F58] hover:text-[#FFF1EA] transition-colors"
           >
             Cadastre-se como Empresa
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/cadastro/secretaria")}
+            className="w-full px-3 py-4 bg-transparent border-2 border-[#F55F58] text-[#F55F58] text-base font-medium leading-none hover:bg-[#F55F58] hover:text-[#FFF1EA] transition-colors"
+          >
+            Cadastre-se como Secretaria
           </button>
         </div>
 

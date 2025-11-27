@@ -1,4 +1,5 @@
 import { api } from "../api/axios";
+import { CompanyRegistrationData, DepartmentRegistrationData } from "./registrationServices";
 
 // Interface que reflete os dados REAIS que vêm do Backend
 // Isso é mais detalhado que o token JWT
@@ -54,10 +55,23 @@ export const userService = {
     }
   },
 
-
-  // Exemplo de método para atualizar perfil
-  async updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {
-    const response = await api.put<UserProfile>("/users/me", data);
-    return response.data;
+  async updateProfileSecretaria(id: string, data: Partial<DepartmentRegistrationData>): Promise<UserProfile> {
+    try {
+      const response = await api.put<UserProfile>(`/secretaria/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar perfil da secretaria", error);
+      throw error;
+    }
   },
-};
+  
+  async updateProfileEmpresa(id: string, data: Partial<CompanyRegistrationData>): Promise<UserProfile> {
+    try {
+      const response = await api.put<UserProfile>(`/empresa/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar perfil da empresa", error);
+      throw error;
+    }
+  },
+}

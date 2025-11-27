@@ -22,6 +22,12 @@ export interface DepartmentRegistrationData {
   municipio: string;
 }
 
+export interface UserRegistrationData {
+  name: string;
+  email: string;
+  password: string;
+}
+
 /**
  * Registra uma nova empresa no sistema.
  * @param companyData - Os dados da empresa a serem registrados.
@@ -55,7 +61,18 @@ const registerDepartment = async (
   }
 };
 
+const registerUser = async (userData: UserRegistrationData) => {
+  try {
+    const response = await api.post("/api/user/create", userData);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao registrar usuário:", error);
+    throw error;
+  }
+};
+
 export const registrationService = {
   registerCompany,
   registerDepartment,
+  registerUser,
 };
