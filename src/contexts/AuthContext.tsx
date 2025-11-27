@@ -125,24 +125,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (rememberMe) {
         localStorage.setItem("login_time", new Date().getTime().toString());
       }
-
+      console.log(tokenPayload.scope)
       // 5. Redirecionamento
       switch (tokenPayload.scope) {
         case "ROLE_SUPER_ADMIN":
         case "ROLE_ADMIN":
-          router.push("/home/adm");
+          console.log("login admin")
+          router.replace("/home/adm");
           break;
         case "ROLE_USER":
-          router.push("/home/");
+          console.log("login user")
+          router.replace("/home/user");
           break;
         case "ROLE_EMPRESA":
-          router.push("/home/empresa");
+          console.log("login empresa")
+          router.replace("/home/empresa");
           break;
         case "ROLE_SECRETARIA":
-          router.push("/home/secretaria");
+          console.log("login secretaria")
+          router.replace("/home/secretaria");
           break;
         default:
-          router.push("/login");
+          router.replace("/login");
       }
     } catch (error) {
       console.error("Error during login:", error);

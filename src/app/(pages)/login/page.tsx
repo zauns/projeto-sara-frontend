@@ -1,20 +1,19 @@
 "use client";
-import React, { useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useAuth } from "../../../contexts/AuthContext";
 import LoginForm from "../../../components/core/login-form";
+// 1. Importe o hook customizado
+import { useProtectedRoute } from "../../../hooks/useProtectedRoute";
 
 export default function Login() {
-  const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  // 2. Configure o hook para "Guest Only" (requireAuth: false)
+  // Definimos redirectTo como "/" para passar na verificação do hook 
+  // e permitir que o switch(role) faça o redirecionamento correto.
+  const { isAuthenticated, isLoading } = useProtectedRoute({
+    requireAuth: false,
+    redirectTo: "/", 
+  });
 
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.push("/home");
-    }
-  }, [isAuthenticated, isLoading, router]);
-
+  // 3. Mantém a tela branca enquanto carrega ou enquanto prepara o redirecionamento
   if (isLoading || isAuthenticated) {
     return <div className="min-h-screen bg-white" />;
   }
@@ -32,11 +31,7 @@ export default function Login() {
         />
       </div>
 
-      {/* LADO DIREITO (Formulário) 
-          - bg-[#FFF1EA]: Garante que o fundo laranja preencha toda a coluna.
-          - md:justify-center: Centraliza verticalmente o conteúdo (LoginForm) apenas no desktop.
-          - flex flex-col: Necessário para o alinhamento funcionar.
-      */}
+      {/* LADO DIREITO (Formulário) */}
       <div className="w-full md:w-[40%] bg-[#FFF1EA] flex flex-col md:justify-center">
         <LoginForm />
       </div>

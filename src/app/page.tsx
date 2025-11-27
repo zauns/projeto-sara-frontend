@@ -25,7 +25,7 @@ export default function DebugRoutesPage() {
 
     // Rotas de página implementadas
     {
-      path: "/home",
+      path: "/home/user",
       description:
         "Página inicial do usuário autenticado com dashboard e informações de sessão",
       status: "active",
