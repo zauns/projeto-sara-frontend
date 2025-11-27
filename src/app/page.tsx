@@ -31,9 +31,44 @@ export default function DebugRoutesPage() {
       status: "active",
     },
     {
+      path: "/home/adm",
+      description: "Página de administração da home",
+      status: "active",
+    },
+    {
       path: "/login",
       description:
         "Página de login com suporte a desktop e mobile, autenticação e remember me",
+      status: "active",
+    },
+    {
+      path: "/login/adm",
+      description: "Página de login de administrador",
+      status: "active",
+    },
+    {
+      path: "/cadastro/empresa",
+      description: "Página de cadastro de empresa",
+      status: "active",
+    },
+    {
+      path: "/cadastro/secretaria",
+      description: "Página de cadastro de secretaria",
+      status: "active",
+    },
+    {
+      path: "/perfil",
+      description: "Página de perfil do usuário",
+      status: "active",
+    },
+    {
+      path: "/vagas",
+      description: "Página de listagem de vagas",
+      status: "active",
+    },
+    {
+      path: "/vagas/1",
+      description: "Página de detalhes de uma vaga",
       status: "active",
     },
 
@@ -41,11 +76,6 @@ export default function DebugRoutesPage() {
     {
       path: "/perfil/curriculo",
       description: "Página de criação e edição de currículo do usuário",
-      status: "planned",
-    },
-    {
-      path: "/perfil",
-      description: "Página de perfil do usuário",
       status: "planned",
     },
 
