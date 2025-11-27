@@ -4,7 +4,7 @@ import { api } from "@/api/axios";
 export interface CompanyRegistrationData {
   nome: string;
   email: string;
-  senha?: string; // Senha pode ser opcional dependendo da lógica de confirmação
+  senha: string; // Senha pode ser opcional dependendo da lógica de confirmação
   telefone: string;
   endereco: string;
   cnpj: string;
@@ -16,7 +16,7 @@ export interface CompanyRegistrationData {
 export interface DepartmentRegistrationData {
   nome: string;
   email: string;
-  senha?: string;
+  senha: string;
   telefone: string;
   endereco: string;
   municipio: string;
