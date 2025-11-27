@@ -113,7 +113,7 @@ const Home = () => {
                   <span className="text-sm font-medium text-gray-500">
                     Nome:
                   </span>
-                  <p className="text-sm text-gray-900">{user?.name || "N/A"}</p>
+                  <p className="text-sm text-gray-900">{user?.nome || "N/A"}</p>
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-500">

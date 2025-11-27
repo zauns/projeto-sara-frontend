@@ -1,20 +1,68 @@
 import axios from "axios";
-import { tokenUtils } from "../utils/cookies"; // Assumindo que seu utils existe
+import { tokenUtils } from "../utils/cookies";
 
-// Define a URL base para não repetir em todo lugar
-export const api = axios.create({
+const api = axios.create({
   baseURL: "http://localhost:8080",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Interceptor opcional: Anexa o token automaticamente se ele já existir nos cookies
-// Isso ajuda na persistência entre refreshes antes mesmo do Context carregar
-api.interceptors.request.use((config) => {
-  const token = tokenUtils.getAuthToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Endpoints públicos (não requerem autenticação)
+const publicEndpoints = [
+  '/token',
+  '/empresa',
+  '/secretaria',
+];
+
+// Endpoints privados (exceções dos públicos) - strings ou regex
+const privateEndpoints: (string | RegExp)[] = [
+  '/empresa/pendentes',
+  '/empresa/aprovar',
+  '/secretaria/pendentes',
+  '/secretaria/aprovar',
+  /^\/empresa\/[^/]+$/,
+  /^\/secretaria\/[^/]+$/, // /empresa/{id} - match exato com um ID
+];
+
+const matchesPrivateEndpoint = (url: string): boolean => {
+  return privateEndpoints.some(endpoint => {
+    if (endpoint instanceof RegExp) {
+      return endpoint.test(url);
+    }
+    return url === endpoint || url.startsWith(endpoint + '/');
+  });
+};
+
+const isPublicEndpoint = (url: string | undefined): boolean => {
+  if (!url) return false;
+  
+  // Primeiro verifica se é um endpoint explicitamente privado
+  if (matchesPrivateEndpoint(url)) {
+    return false;
   }
-  return config;
-});
+  
+  // Depois verifica se é público (match exato ou começa com endpoint + /)
+  return publicEndpoints.some(endpoint => 
+    url === endpoint || url.startsWith(endpoint + '/')
+  );
+};
+
+api.interceptors.request.use(
+  (config) => {
+    if (!isPublicEndpoint(config.url)) {
+      const token = tokenUtils.getAuthToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
+    return config;
+  },
+  (error) => {
+    console.error("Erro no interceptor de request:", error);
+    return Promise.reject(error);
+  }
+);
+
+export { api };

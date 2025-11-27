@@ -14,7 +14,7 @@ export const approvalService = {
 
   async approveCompany(id: string): Promise<void> {
     try {
-      await api.put(`/empresas/aprovar/${id}`);
+      await api.put(`/empresa/aprovar/${id}`);
     } catch (error) {
       console.error("Erro ao aprovar empresa", error);
       throw error;
@@ -33,7 +33,7 @@ export const approvalService = {
 
   async approveSecretary(id: string): Promise<void> {
     try {
-      await api.put(`/secretarias/aprovar/${id}`);
+      await api.put(`/secretaria/aprovar/${id}`);
     } catch (error) {
       console.error("Erro ao aprovar secretaria", error);
       throw error;

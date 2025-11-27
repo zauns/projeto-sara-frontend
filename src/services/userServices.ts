@@ -4,11 +4,11 @@ import { api } from "../api/axios";
 // Isso é mais detalhado que o token JWT
 export interface UserProfile {
   id: string;
-  name: string;
+  nome: string; //mudei pro ContaResponse igual do back por desencargo de consciência
   email: string;
-  telephone: string;
-  address: string;
-  accountType: string;
+  telefone: string;
+  endereco: string;
+  tipoConta: string;
   // Adicione outros campos necessários para a Home/Perfil
 }
 
@@ -53,7 +53,7 @@ export const userService = {
       throw error;
     }
   },
-  
+
 
   // Exemplo de método para atualizar perfil
   async updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {

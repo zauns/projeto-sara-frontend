@@ -81,6 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     rememberMe: boolean = false,
   ) => {
     try {
+      console.log(tokenUtils.getAuthToken())
       // 1. Armazena o token primeiro para chamadas de API autenticadas
       tokenUtils.setAuthToken(authToken, rememberMe);
       setToken(authToken);
