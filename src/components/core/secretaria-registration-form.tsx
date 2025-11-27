@@ -17,6 +17,7 @@ import {
   registrationService,
   DepartmentRegistrationData,
 } from "@/services/registrationServices";
+import { formatPhone, isValidPhone } from "@/utils/utils";
 
 export function SecretariaRegistrationForm() {
   const [formData, setFormData] = useState<
@@ -32,12 +33,22 @@ export function SecretariaRegistrationForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    let formattedValue = value;
+
+    if (id === "telefone") {
+      formattedValue = formatPhone(value);
+      if (isValidPhone(formattedValue)) {
+        setPhoneError(null);
+      }
+    }
+
+    setFormData((prev) => ({ ...prev, [id]: formattedValue }));
   };
 
   const handleSelectChange = (value: string) => {
@@ -48,6 +59,13 @@ export function SecretariaRegistrationForm() {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
+    setPhoneError(null);
+
+    if (!isValidPhone(formData.telefone)) {
+      setPhoneError("Telefone inválido.");
+      setIsLoading(false);
+      return;
+    }
 
     if (formData.senha !== confirmPassword) {
       setError("As senhas não coincidem.");
@@ -118,7 +136,9 @@ export function SecretariaRegistrationForm() {
               onChange={handleChange}
               placeholder="(00) 00000-0000"
               required
+              maxLength={15}
             />
+            {phoneError && <p className="text-sm text-red-500">{phoneError}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="municipio">Município</Label>

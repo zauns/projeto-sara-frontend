@@ -11,6 +11,12 @@ import {
   registrationService,
   CompanyRegistrationData,
 } from "@/services/registrationServices";
+import {
+  formatCNPJ,
+  isValidCNPJ,
+  formatPhone,
+  isValidPhone,
+} from "@/utils/utils";
 
 export function CompanyRegistrationForm() {
   const [formData, setFormData] = useState<CompanyRegistrationData>({
@@ -25,6 +31,8 @@ export function CompanyRegistrationForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cnpjError, setCnpjError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const router = useRouter();
@@ -33,9 +41,23 @@ export function CompanyRegistrationForm() {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { id, value } = e.target;
+
+    let formattedValue = value;
+    if (id === "cnpj") {
+      formattedValue = formatCNPJ(value);
+      if (isValidCNPJ(formattedValue)) {
+        setCnpjError(null);
+      }
+    } else if (id === "telefone") {
+      formattedValue = formatPhone(value);
+      if (isValidPhone(formattedValue)) {
+        setPhoneError(null);
+      }
+    }
+
     setFormData((prevData) => ({
       ...prevData,
-      [id]: value,
+      [id]: formattedValue,
     }));
   };
 
@@ -43,9 +65,23 @@ export function CompanyRegistrationForm() {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
+    setCnpjError(null);
+    setPhoneError(null);
 
     if (formData.senha !== confirmPassword) {
       setError("As senhas não coincidem.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isValidCNPJ(formData.cnpj)) {
+      setCnpjError("CNPJ inválido.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isValidPhone(formData.telefone)) {
+      setPhoneError("Telefone inválido.");
       setIsLoading(false);
       return;
     }
@@ -96,6 +132,7 @@ export function CompanyRegistrationForm() {
               placeholder="00.000.000/0000-00"
               required
             />
+            {cnpjError && <p className="text-sm text-red-500">{cnpjError}</p>}
           </div>
 
           <div className="space-y-2">
@@ -131,6 +168,9 @@ export function CompanyRegistrationForm() {
                 placeholder="(00) 00000-0000"
                 required
               />
+              {phoneError && (
+                <p className="text-sm text-red-500">{phoneError}</p>
+              )}
             </div>
           </div>
 
