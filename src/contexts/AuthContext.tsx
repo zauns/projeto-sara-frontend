@@ -81,6 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     rememberMe: boolean = false,
   ) => {
     try {
+      console.log(tokenUtils.getAuthToken())
       // 1. Armazena o token primeiro para chamadas de API autenticadas
       tokenUtils.setAuthToken(authToken, rememberMe);
       setToken(authToken);
@@ -112,6 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (rememberMe) {
         localStorage.setItem("login_time", new Date().getTime().toString());
       }
+      console.log(tokenUtils.getAuthToken())
 
       // Navega para a página home
       switch (tokenPayload.scope) {

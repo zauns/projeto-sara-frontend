@@ -27,7 +27,6 @@ export function SecretariaRegistrationForm() {
     telefone: "",
     email: "",
     senha: "",
-    is_validada: false,
   });
   const [municipio, setMunicipio] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

@@ -10,7 +10,6 @@ export interface CompanyRegistrationData {
   cnpj: string;
   biografia: string;
   links: string; // Pode ser um JSON stringificado ou um campo de texto simples
-  is_validada: false;
 }
 
 // Interface para os dados de cadastro da secretaria
@@ -21,7 +20,6 @@ export interface DepartmentRegistrationData {
   telefone: string;
   endereco: string;
   municipio: string;
-  is_validada: false;
 }
 
 /**
