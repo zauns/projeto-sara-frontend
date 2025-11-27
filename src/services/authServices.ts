@@ -52,7 +52,7 @@ export const authService = {
                 // Tratamento específico de erro do Axios
                 const message = error.response?.data || error.message;
                 if (error.response?.status === 401 || error.response?.status === 403) {
-                     throw new Error("Credenciais inválidas ou conta pendente.");
+                     throw new Error(`Credenciais inválidas ou conta pendente. ${message}`);
                 }
                 throw new Error(error.response?.data?.message || "Falha na autenticação");
             }
