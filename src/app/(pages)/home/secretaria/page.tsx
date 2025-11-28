@@ -8,13 +8,14 @@ import { SecretariaDetailsCard } from "@/components/core/secretaria-details-card
 import { UserRegistrationForm } from "@/components/core/user-registration-form"; // Ajuste o caminho
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { SecretariaProfile } from "@/services/userServices";
 
 const SecretaryHome = () => {
   // Hook de proteção de rota e estado de carregamento
   const { isLoading, canAccess } = useRequireAuth();
   
   // Obtendo o usuário logado e função de logout do contexto
-  const { user, logout } = useAuth();
+  const { logout, userDetails } = useAuth();  
 
   // Exibe loading enquanto verifica autenticação
   if (isLoading) {
@@ -52,7 +53,7 @@ const SecretaryHome = () => {
               Seus Dados
             </h2>
             {/* O componente SecretariaDetailsCard já possui padding e Card interno */}
-            <SecretariaDetailsCard user={user} />
+            <SecretariaDetailsCard user={userDetails as SecretariaProfile} />
           </div>
 
           {/* Coluna 2: Formulário de Cadastro */}
