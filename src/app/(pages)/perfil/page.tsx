@@ -1,24 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/core/header";
 import { ProfilePhotoCard } from "@/components/core/profile-photo-card";
 import { StandardUserDetailsCard } from "@/components/core/user-details-card";
 import { CurriculumDisplay } from "@/components/core/curriculum-display";
 import { CurriculumForm } from "@/components/core/curriculum-form";
 import { CurriculumData } from "@/types/curriculum";
+import { useAuth } from "@/contexts/AuthContext"; // Importando contexto de auth
+import { userService, UserProfile } from "@/services/userServices"; // Importando serviço e tipo
 
 export default function ProfilePage() {
-  // Estado para dados do usuário (dados fictícios)
-  const [userDetails, setUserDetails] = useState({
-    firstName: "Maria",
-    lastName: "Souza",
-    phone: "(81) 98888-7777",
-    email: "maria.souza@email.com",
-    address: "Rua das Flores, 123, Recife",
-  });
+  // Obtém o usuário do contexto para pegar o ID
+  // Nota: Assumimos que o objeto 'user' do contexto possui pelo menos o 'id'
+  const { user } = useAuth(); 
+  
+  // Estado para armazenar os dados reais do perfil vindos do Backend
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
-  // Estado para dados do currículo (dados fictícios iniciais)
+  // Estado para dados do currículo (MANTIDO MOCKADO CONFORME SOLICITADO)
   const [curriculum, setCurriculum] = useState<CurriculumData>({
     fullName: "Maria Eduarda de Souza",
     phoneNumber: "(81) 98888-7777",
@@ -34,31 +35,47 @@ export default function ProfilePage() {
       "React, Next.js, TypeScript, JavaScript, HTML, CSS, TailwindCSS, Git, Figma.",
   });
 
-  // Estado para controle de edição do currículo
   const [isEditingCurriculum, setIsEditingCurriculum] = useState(false);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | undefined>(undefined);
 
-  // Estado para URL da foto de perfil (inicialmente vazio, usará fallback)
-  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | undefined>(
-    undefined,
-  );
+  // Efeito para buscar os dados reais do usuário ao carregar a página
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?.id) {
+        setIsLoadingProfile(true);
+        try {
+          // Busca os dados usando o serviço. 
+          // Se o seu sistema tiver múltiplos tipos de usuários acessando essa mesma página,
+          // você pode usar a lógica de roles aqui ou usar getProfileGeneric(user.id, user.role)
+          const data = await userService.getProfileUser(user.id);
+          setUserProfile(data);
+        } catch (error) {
+          console.error("Erro ao carregar perfil:", error);
+        } finally {
+          setIsLoadingProfile(false);
+        }
+      }
+    };
 
-  // Handler para salvar currículo (dados locais)
+    fetchUserData();
+  }, [user]); // Recarrega se o usuário do contexto mudar
+
+  // Handlers do Currículo (MANTIDOS)
   const handleCurriculumSubmit = (formData: CurriculumData) => {
     setCurriculum(formData);
     setIsEditingCurriculum(false);
     console.log("Currículo atualizado localmente:", formData);
   };
 
-  // Handler para alterar foto de perfil (localmente)
   const handleProfilePhotoChange = (newPhotoUrl: string) => {
     setProfilePhotoUrl(newPhotoUrl);
     console.log("Foto de perfil atualizada localmente");
   };
 
-  // Handler para logout
   const handleLogout = () => {
     console.log("Fazendo logout...");
-    // Adicionar lógica real de logout aqui
+    // Adicionar lógica real de logout aqui se necessário, 
+    // mas geralmente o Header já lida com isso ou chama uma função do AuthContext
   };
 
   return (
@@ -72,9 +89,15 @@ export default function ProfilePage() {
               profileImageUrl={profilePhotoUrl}
               onPhotoChange={handleProfilePhotoChange}
             />
-            <StandardUserDetailsCard
-              user={userDetails}
-            />
+            
+            {/* Passamos o perfil carregado do backend ou null enquanto carrega */}
+            {isLoadingProfile ? (
+              <div className="p-4 text-center bg-white rounded shadow">Carregando dados...</div>
+            ) : (
+              <StandardUserDetailsCard
+                user={userProfile}
+              />
+            )}
           </div>
 
           {/* Coluna Direita: Currículo */}
