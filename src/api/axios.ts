@@ -22,16 +22,18 @@ const privateEndpoints: (string | RegExp)[] = [
   '/secretaria/pendentes',
   '/secretaria/aprovar',
   '/api/user/create',
-  '/api/user/dados',
-  'secretaria/dados',
-  'empresa/dados',
-  'administrador/dados',
-  
-  // REGEX PARA ROTAS DINÂMICAS (COM ID)
-  /^\/empresa\/[^/]+$/,        // Cobre: /empresa/${id}
-  /^\/secretaria\/[^/]+$/,     // Cobre: /secretaria/${id}
-  /^\/administrador\/[^/]+$/,  // Cobre /administrador/${id}
-  /^\/api\/user\/[^/]+$/       // Cobre /api/user/${id}
+
+  // --- Regex para Rotas Dinâmicas (Nível 1 - ex: /empresa/{id}) ---
+  /^\/empresa\/[^/]+$/,        
+  /^\/secretaria\/[^/]+$/,     
+  /^\/administrador\/[^/]+$/,  
+  /^\/api\/user\/[^/]+$/,       
+
+  // --- Regex para Rotas Dinâmicas de DADOS (Nível 2 - ex: /empresa/dados/{id}) ---
+  /^\/administrador\/dados\/[^/]+$/,  // Cobre: /administrador/dados/${id}
+  /^\/api\/user\/dados\/[^/]+$/,      // Cobre: /api/user/dados/${id}
+  /^\/secretaria\/dados\/[^/]+$/,     // Cobre: /secretaria/dados/${id}
+  /^\/empresa\/dados\/[^/]+$/         // Cobre: /empresa/dados/${id}
 ];
 
 const matchesPrivateEndpoint = (url: string): boolean => {
