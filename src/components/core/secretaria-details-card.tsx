@@ -7,23 +7,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 
-export interface UserProfile {
-  id: string;
+export interface SecretariaProfile {
   nome: string;
   email: string;
   telefone: string;
   endereco: string;
-  tipoConta: string;
+  municipio: string;
 }
 
-export function StandardUserDetailsCard({ user }: { user?: UserProfile | null }) {
+export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | null }) {
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     telefone: "",
     endereco: "",
+    municipio: ""
   });
 
   useEffect(() => {
@@ -33,61 +34,62 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
         email: user.email || "",
         telefone: user.telefone || "",
         endereco: user.endereco || "",
+        municipio: user.municipio || "",
       });
     }
   }, [user]);
 
   const handleSave = async () => {
-    // Lógica de update simplificada
     await updateUser(formData);
     setIsEditing(false);
   };
 
   return (
-    <Card className="w-full bg-white shadow-md">
+    <Card className="w-full bg-white shadow-md border-l-4 border-l-blue-600">
       <CardHeader>
-        <CardTitle>Meus Dados</CardTitle>
+        <CardTitle>Dados da Secretaria</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-             <div className="space-y-2">
-                <Label>ID (Sistema)</Label>
-                <Input value={user?.id || ""} disabled />
-            </div>
-            <div className="space-y-2">
-                <Label>Tipo de Conta</Label>
-                <Input value={user?.tipoConta || ""} disabled className="bg-gray-100" />
-            </div>
-        </div>
-
         <div className="space-y-2">
-          <Label>Nome</Label>
+          <Label>Nome do Representante / Secretaria</Label>
           <Input 
             value={formData.nome} 
             onChange={(e) => setFormData({...formData, nome: e.target.value})} 
             disabled={!isEditing} 
           />
         </div>
-        
-        {/* Campos de contato */}
+
         <div className="space-y-2">
-            <Label>Email</Label>
+            <Label>Município de Atuação</Label>
+            {/* O Município pode ser editável ou fixo dependendo da regra de negócio. Deixei editável aqui. */}
+            <Input 
+                value={formData.municipio} 
+                onChange={(e) => setFormData({...formData, municipio: e.target.value})} 
+                disabled={!isEditing} 
+                placeholder="Ex: São Paulo"
+            />
+        </div>
+
+        <div className="space-y-2">
+            <Label>Email Oficial</Label>
             <Input value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} disabled={!isEditing} />
         </div>
+        
         <div className="space-y-2">
             <Label>Telefone</Label>
             <Input value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} disabled={!isEditing} />
         </div>
-         <div className="space-y-2">
-            <Label>Endereço</Label>
+        
+        <div className="space-y-2">
+            <Label>Endereço da Sede</Label>
             <Input value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} disabled={!isEditing} />
         </div>
 
-        <div className="pt-4 flex gap-3">
+        <div className="pt-4 flex justify-end gap-3">
           {isEditing ? (
-             <Button onClick={handleSave}>Salvar</Button> 
+             <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">Confirmar</Button> 
           ) : (
-             <Button variant="outline" onClick={() => setIsEditing(true)}>Editar</Button>
+             <Button variant="outline" onClick={() => setIsEditing(true)}>Alterar Dados</Button>
           )}
         </div>
       </CardContent>

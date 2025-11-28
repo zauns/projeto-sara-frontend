@@ -9,11 +9,12 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { tokenUtils, userDataUtils } from "../utils/cookies";
-import { UserProfile, userService } from "../services/userServices";
+import { UserProfile, UserProfileGeneric, userService } from "../services/userServices";
 import { UserTokenPayload } from "../services/authServices";
 
 interface AuthContextType {
-  user: UserProfile | null;
+  user: UserProfileGeneric | null;
+  userDetails: unknown | null;
   token: string | null;
   role: string | null; // Adicionado para expor a role no contexto
   isAuthenticated: boolean;
@@ -24,7 +25,7 @@ interface AuthContextType {
     rememberMe?: boolean,
   ) => Promise<void>;
   logout: () => void;
-  updateUser: (userData: Partial<UserProfile>) => Promise<void>; // Agora retorna uma Promise
+  updateUser: (userData: Partial<unknown>) => Promise<void>; // Agora retorna uma Promise
 }
 
 // Criar Contexto
@@ -45,7 +46,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfileGeneric | null>(null);
+  const [userDetails, setUserDetails] = useState<unknown | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null); // Estado para armazenar a role
   const [isLoading, setIsLoading] = useState(true);
@@ -97,26 +99,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem("user_role", tokenPayload.scope); // Persiste a role
 
       // 3. Busca o perfil baseado na role
-      let userProfile: UserProfile;
+      let userProfile: UserProfileGeneric;
+      let userProfileDetails: unknown
 
       switch (tokenPayload.scope) {
         case "ROLE_ADMIN":
         case "ROLE_SUPER_ADMIN":
-          userProfile = await userService.getProfileAdmin(tokenPayload.userId);
+          userProfile = await userService.getProfileGeneric(tokenPayload.userId, tokenPayload.scope);
+          userProfileDetails = await userService.getProfileAdmin(tokenPayload.userId);
           break;
         case "ROLE_USER":
-          userProfile = await userService.getProfileUser(tokenPayload.userId);
+          userProfile = await userService.getProfileGeneric(tokenPayload.userId, tokenPayload.scope);
+          userProfileDetails = await userService.getProfileUser(tokenPayload.userId);
           break;
         case "ROLE_SECRETARIA":
-          userProfile = await userService.getProfileSecretaria(tokenPayload.userId);
+          userProfile = await userService.getProfileGeneric(tokenPayload.userId, tokenPayload.scope);
+          userProfileDetails = await userService.getProfileSecretaria(tokenPayload.userId);
           break;
         case "ROLE_EMPRESA":
-          userProfile = await userService.getProfileEmpresa(tokenPayload.userId);
+          userProfile = await userService.getProfileGeneric(tokenPayload.userId, tokenPayload.scope);
+          userProfileDetails = await userService.getProfileEmpresa(tokenPayload.userId);
           break;
         default:
           throw new Error("Invalid role");
       }
-
+      setUserDetails(userProfileDetails)
       setUser(userProfile);
 
       // 4. Armazena os dados do usuário
@@ -173,8 +180,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Atualiza dados do usuário (Backend + Frontend)
-  const updateUser = async (userData: Partial<UserProfile>) => {
-    if (!user || !user.id) return;
+  const updateUser = async (userData: Partial<UserProfileGeneric>) => {
+    if (!user || !user?.id) return;
 
     try {
       // 1. Identifica a role e chama o serviço específico de atualização
@@ -217,6 +224,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
+    userDetails,
     token,
     role,
     isAuthenticated,
