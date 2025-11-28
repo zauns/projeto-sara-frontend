@@ -17,6 +17,7 @@ import { UserRegistrationForm } from '@/components/core/usuaria-registration-for
 import { useAuth } from "@/contexts/AuthContext";
 import { PublishJobForm } from '@/components/core/publish-job-form';
 import { CandidateCard } from '@/components/core/candidate-card';
+import { JobDetailsCard } from '@/components/core/job-details-card';
 
 export default function SandboxPage() {
   const { user, logout } = useAuth();
@@ -107,6 +108,47 @@ export default function SandboxPage() {
           onViewProfile={() => console.log("Usuário clicou em Ver Perfil")}
         // Exemplo sem os botões de aprovar/rejeitar e sem foto
         />
+        <div className="p-4 md:p-8 bg-gray-100 flex justify-center min-h-screen">
+          <JobDetailsCard
+            // Cabeçalho
+            title="Assistente Administrativa e Financeira"
+            companyName="Instituto Mulheres de Valor"
+            companyLogoUrl="https://github.com/shadcn.png" // Placeholder
+            location="Recife, PE"
+            postedAt="Publicado hoje"
+
+            // Tags
+            jobType="Tempo Integral (CLT)"
+            modality="Presencial"
+            level="Júnior"
+
+            // Descrição
+            description={`Estamos em busca de uma profissional organizada e dedicada para integrar nosso time administrativo. 
+    
+    O Instituto Mulheres de Valor atua há 10 anos capacitando mulheres em situação de vulnerabilidade através da educação e do trabalho. Se você busca um ambiente acolhedor, com propósito social e oportunidade de aprendizado prático, essa vaga é para você.`}
+
+            // Listas
+            responsibilities={[
+              "Realizar o atendimento telefônico e recepção de parceiros e alunas.",
+              "Auxiliar no controle de fluxo de caixa diário e organização de notas fiscais.",
+              "Gerenciar a agenda da diretoria e marcar reuniões de equipe.",
+              "Apoiar na organização de eventos beneficentes e workshops do instituto.",
+              "Manter o arquivo de documentos físicos e digitais organizado."
+            ]}
+
+            requirements={[
+              "Ensino Médio Completo (Ensino Superior em andamento será um diferencial).",
+              "Conhecimento básico no Pacote Office (Word, Excel) e Google Drive.",
+              "Boa comunicação verbal e escrita.",
+              "Proatividade e vontade de aprender.",
+              "Identificação com causas sociais e apoio à comunidade."
+            ]}
+
+
+            isApplied={false} 
+
+          />
+        </div>
       </div>
     </div>
   );

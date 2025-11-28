@@ -7,13 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    Select,
+    Select,  
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-// Reutilizando o diálogo de sucesso genérico que criamos
 import { SuccessDialog } from "@/components/core/success-dialogue";
 
 export function PublishJobForm() {
