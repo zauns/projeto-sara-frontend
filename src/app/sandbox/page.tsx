@@ -15,6 +15,7 @@ import { CompanyLoginForm } from '@/components/core/company-login-form';
 import { SecretariaLoginForm } from '@/components/core/secretaria-login-form';
 import { UserRegistrationForm } from '@/components/core/usuaria-registration-form';
 import { useAuth } from "@/contexts/AuthContext";
+import { PublishJobForm } from '@/components/core/publish-job-form';
 
 export default function SandboxPage() {
   const { user, logout } = useAuth();
@@ -70,12 +71,14 @@ export default function SandboxPage() {
 
       {/* <SecretariaRegistrationForm /> */}
 
-      <div className="space-y-8 p-8 bg-gray-100">
-        <CompanyLoginForm />  
-        <SecretariaLoginForm />
+      <CompanyLoginForm />  
+      <SecretariaLoginForm />
 
-        <UserRegistrationForm />
-      </div>
+      <UserRegistrationForm />
+
+
+      <PublishJobForm />
+
     </div>
   );
 }

@@ -13,7 +13,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "../ui/textarea";
-import { SuccessDialog } from './sucess-dialogue';
+import { SuccessDialog } from './success-dialogue';
 
 
 //Formulário principal para o cadastro de novas empresas,

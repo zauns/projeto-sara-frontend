@@ -12,7 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SuccessDialog } from '@/components/core/sucess-dialogue';
+import { SuccessDialog } from '@/components/core/success-dialogue';
 
 export function SecretariaRegistrationForm() {
 
