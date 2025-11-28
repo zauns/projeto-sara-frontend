@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Header } from "@/components/core/header";
 import { ProfilePhotoCard } from "@/components/core/profile-photo-card";
-import { UserDetailsCard } from "@/components/core/user-details-card";
+import { StandardUserDetailsCard } from "@/components/core/user-details-card";
 import { CurriculumDisplay } from "@/components/core/curriculum-display";
 import { CurriculumForm } from "@/components/core/curriculum-form";
 import { CurriculumData } from "@/types/curriculum";
@@ -72,12 +72,8 @@ export default function ProfilePage() {
               profileImageUrl={profilePhotoUrl}
               onPhotoChange={handleProfilePhotoChange}
             />
-            <UserDetailsCard
-              firstName={userDetails.firstName}
-              lastName={userDetails.lastName}
-              phone={userDetails.phone}
-              email={userDetails.email}
-              address={userDetails.address}
+            <StandardUserDetailsCard
+              user={userDetails}
             />
           </div>
 

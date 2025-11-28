@@ -4,7 +4,7 @@ import React from "react";
 import { useRequireAuth } from "@/hooks/useProtectedRoute"; // Ajuste o caminho conforme sua estrutura
 import { useAuth } from "@/contexts/AuthContext"; // Ajuste o caminho conforme sua estrutura
 import { Header } from "@/components/core/header"; // Ajuste o caminho conforme sua estrutura
-import { UserDetailsCard } from "@/components/core/user-details-card"; // Ajuste o caminho
+import { SecretariaDetailsCard } from "@/components/core/secretaria-details-card"; // Ajuste o caminho
 import { UserRegistrationForm } from "@/components/core/user-registration-form"; // Ajuste o caminho
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,8 +51,8 @@ const SecretaryHome = () => {
             <h2 className="text-xl font-bold text-[#F55F58] mb-3 pl-2">
               Seus Dados
             </h2>
-            {/* O componente UserDetailsCard já possui padding e Card interno */}
-            <UserDetailsCard user={user} />
+            {/* O componente SecretariaDetailsCard já possui padding e Card interno */}
+            <SecretariaDetailsCard user={user} />
           </div>
 
           {/* Coluna 2: Formulário de Cadastro */}
