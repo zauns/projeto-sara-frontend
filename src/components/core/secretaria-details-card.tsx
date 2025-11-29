@@ -29,7 +29,7 @@ export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | nul
         telefone: user.telefone || "",
         endereco: user.endereco || "",
         municipio: user.municipio || "",
-        senha: user.senha || "a"
+        senha: user.senha || ""
       });
     }
   }, [user]);
