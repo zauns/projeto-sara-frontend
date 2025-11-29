@@ -1,4 +1,4 @@
-"use client"; // <--- 1. OBRIGATÓRIO: Transforma esta página em Client Component
+"use client";
 
 import { Header } from '@/components/core/header';
 import { SearchBar } from '@/components/core/search-bar';
