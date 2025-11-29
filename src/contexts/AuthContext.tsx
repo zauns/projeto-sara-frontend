@@ -222,7 +222,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // await userService.updateProfileAdmin(user.id, userData as UserProfile);
           break;
         case "ROLE_USER":
-          userService.updateProfileUser(user.id, userData as UserProfile);
+          updatedUserDetails = await userService.updateProfileUser(user.id, userData as UserProfile);
           break;
         default:
           console.warn("Role não identificada para atualização específica.");
