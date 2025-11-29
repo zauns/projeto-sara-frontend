@@ -158,7 +158,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (rememberMe) {
         localStorage.setItem("login_time", new Date().getTime().toString());
       }
-      console.log(tokenPayload.scope)
       // 5. Redirecionamento
       switch (tokenPayload.scope) {
         case "ROLE_SUPER_ADMIN":

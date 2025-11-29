@@ -27,7 +27,6 @@ type SecretariaFormValues = z.infer<typeof secretariaSchema>;
 export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | null }) {
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  console.log(user)
   const {
     register,
     handleSubmit,

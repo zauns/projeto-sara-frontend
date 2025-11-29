@@ -66,7 +66,6 @@ const registerDepartment = async (
 
 const registerUser = async (userData: UserRegistrationData) => {
   try {
-    console.log("registerUser", userData);
     const response = await api.post("/api/user/create", userData);
     return response.data;
   } catch (error) {

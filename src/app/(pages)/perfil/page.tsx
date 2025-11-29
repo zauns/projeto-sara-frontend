@@ -48,7 +48,6 @@ export default function ProfilePage() {
           // Se o seu sistema tiver múltiplos tipos de usuários acessando essa mesma página,
           // você pode usar a lógica de roles aqui ou usar getProfileGeneric(user.id, user.role)
           const data = await userService.getProfileUser(user.id);
-          console.log(data);
           setUserProfile(data);
         } catch (error) {
           console.error("Erro ao carregar perfil:", error);
@@ -65,16 +64,13 @@ export default function ProfilePage() {
   const handleCurriculumSubmit = (formData: CurriculumData) => {
     setCurriculum(formData);
     setIsEditingCurriculum(false);
-    console.log("Currículo atualizado localmente:", formData);
   };
 
   const handleProfilePhotoChange = (newPhotoUrl: string) => {
     setProfilePhotoUrl(newPhotoUrl);
-    console.log("Foto de perfil atualizada localmente");
   };
 
   const handleLogout = () => {
-    console.log("Fazendo logout...");
     // Adicionar lógica real de logout aqui se necessário, 
     // mas geralmente o Header já lida com isso ou chama uma função do AuthContext
   };

@@ -7,12 +7,10 @@ interface ActionButtonsProps {
 export function ActionButtons({ jobId }: ActionButtonsProps) {
   const handleApply = () => {
     // TODO: Implementar chamada à API
-    console.log(`Candidatar-se à vaga ${jobId}`);
   };
 
   const handleSave = () => {
     // TODO: Implementar chamada à API
-    console.log(`Salvar vaga ${jobId}`);
   };
 
   return (

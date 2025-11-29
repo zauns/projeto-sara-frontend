@@ -51,7 +51,6 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      console.log("Login Administrativo enviado:", { email, rememberMe });
       const credentials: LoginCredentials = { email, password };
       const data = await authService.login(credentials);
       
