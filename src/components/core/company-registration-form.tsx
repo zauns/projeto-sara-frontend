@@ -1,99 +1,92 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "../ui/textarea"; // Ajuste o caminho conforme seu projeto
 import { CompanyRegistrationSuccessDialog } from "./company-registration-dialogue";
-import {
-  registrationService,
-  CompanyRegistrationData,
-} from "@/services/registrationServices";
-import {
-  formatCNPJ,
-  isValidCNPJ,
-  formatPhone,
-  isValidPhone,
-} from "@/utils/utils";
+import { CompanyRegistrationData, registrationService } from "@/services/registrationServices";
+
+// 1. Schema de Validação (Empresa)
+const companySchema = z
+  .object({
+    nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
+    cnpj: z
+      .string()
+      .regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, "CNPJ inválido: 00.000.000/0000-00"),
+    endereco: z.string().min(5, "Endereço muito curto"),
+    email: z.string().email("Email inválido"),
+    telefone: z
+      .string()
+      .regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Formato inválido: (99) 99999-9999"),
+    biografia: z.string().min(10, "A biografia deve ter no mínimo 10 caracteres"),
+    links: z.string().optional(),
+    senha: z
+      .string()
+      .min(8, "Mínimo de 8 caracteres")
+      .regex(/[A-Z]/, "Pelo menos uma letra maiúscula")
+      .regex(/[a-z]/, "Pelo menos uma letra minúscula")
+      .regex(/[0-9]/, "Pelo menos um número")
+      .regex(/[\W_]/, "Pelo menos um caractere especial"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.senha === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
+type CompanyFormValues = z.infer<typeof companySchema>;
 
 export function CompanyRegistrationForm() {
-  const [formData, setFormData] = useState<CompanyRegistrationData>({
-    nome: "",
-    email: "",
-    senha: "",
-    telefone: "",
-    endereco: "",
-    cnpj: "",
-    biografia: "",
-    links: "",
-  });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [cnpjError, setCnpjError] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [apiError, setApiError] = useState<string | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const router = useRouter();
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { id, value } = e.target;
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<CompanyFormValues>({
+    resolver: zodResolver(companySchema),
+    mode: "onBlur",
+  });
 
-    let formattedValue = value;
-    if (id === "cnpj") {
-      formattedValue = formatCNPJ(value);
-      if (isValidCNPJ(formattedValue)) {
-        setCnpjError(null);
-      }
-    } else if (id === "telefone") {
-      formattedValue = formatPhone(value);
-      if (isValidPhone(formattedValue)) {
-        setPhoneError(null);
-      }
-    }
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: formattedValue,
-    }));
+  // Helpers de Máscara
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+    v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+    setValue("telefone", v, { shouldValidate: true });
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+    v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+    v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+    v = v.replace(/(\d{4})(\d)/, "$1-$2");
+    setValue("cnpj", v, { shouldValidate: true });
+  };
+
+  const onSubmit = async (data: CompanyFormValues) => {
     setIsLoading(true);
-    setError(null);
-    setCnpjError(null);
-    setPhoneError(null);
-
-    if (formData.senha !== confirmPassword) {
-      setError("As senhas não coincidem.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!isValidCNPJ(formData.cnpj)) {
-      setCnpjError("CNPJ inválido.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!isValidPhone(formData.telefone)) {
-      setPhoneError("Telefone inválido.");
-      setIsLoading(false);
-      return;
-    }
+    setApiError(null);
 
     try {
-      await registrationService.registerCompany(formData);
+      const { ...apiData } = data;
+      await registrationService.registerCompany(apiData as CompanyRegistrationData);
       setShowSuccessDialog(true);
     } catch (err) {
-      setError(
-        "Ocorreu um erro ao solicitar o cadastro. Verifique os dados e tente novamente.",
-      );
-      console.error("Registration error:", err);
+      setApiError("Erro ao cadastrar empresa. Verifique os dados.");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -106,126 +99,133 @@ export function CompanyRegistrationForm() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 md:p-8">
-      <form className="space-y-8" onSubmit={handleSubmit}>
+      <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
         <fieldset className="space-y-6">
           <legend className="text-2xl font-semibold text-gray-900 border-b pb-2">
             Informações da Empresa
           </legend>
 
+          {/* Nome */}
           <div className="space-y-2">
             <Label htmlFor="nome">Nome</Label>
             <Input
               id="nome"
-              value={formData.nome}
-              onChange={handleChange}
               placeholder="Nome da empresa"
-              required
+              {...register("nome")}
+              className={errors.nome ? "border-red-500 focus-visible:ring-red-500" : ""}
             />
+            {errors.nome && <p className="text-sm text-red-500">{errors.nome.message}</p>}
           </div>
 
+          {/* CNPJ */}
           <div className="space-y-2">
             <Label htmlFor="cnpj">CNPJ</Label>
             <Input
               id="cnpj"
-              value={formData.cnpj}
-              onChange={handleChange}
               placeholder="00.000.000/0000-00"
-              required
+              {...register("cnpj")}
+              onChange={handleCNPJChange}
+              maxLength={18}
+              className={errors.cnpj ? "border-red-500 focus-visible:ring-red-500" : ""}
             />
-            {cnpjError && <p className="text-sm text-red-500">{cnpjError}</p>}
+            {errors.cnpj && <p className="text-sm text-red-500">{errors.cnpj.message}</p>}
           </div>
 
+          {/* Endereço */}
           <div className="space-y-2">
             <Label htmlFor="endereco">Endereço</Label>
             <Input
               id="endereco"
-              value={formData.endereco}
-              onChange={handleChange}
               placeholder="Endereço completo da sede"
-              required
+              {...register("endereco")}
+              className={errors.endereco ? "border-red-500 focus-visible:ring-red-500" : ""}
             />
+            {errors.endereco && <p className="text-sm text-red-500">{errors.endereco.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
                 placeholder="contato@suaempresa.com"
-                required
+                {...register("email")}
+                className={errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
             </div>
+            {/* Telefone */}
             <div className="space-y-2">
               <Label htmlFor="telefone">Telefone</Label>
               <Input
                 id="telefone"
-                type="tel"
-                value={formData.telefone}
-                onChange={handleChange}
                 placeholder="(00) 00000-0000"
-                required
+                {...register("telefone")}
+                onChange={handlePhoneChange}
+                maxLength={15}
+                className={errors.telefone ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
-              {phoneError && (
-                <p className="text-sm text-red-500">{phoneError}</p>
-              )}
+              {errors.telefone && <p className="text-sm text-red-500">{errors.telefone.message}</p>}
             </div>
           </div>
 
+          {/* Senhas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="senha">Senha</Label>
               <Input
                 id="senha"
                 type="password"
-                value={formData.senha}
-                onChange={handleChange}
                 placeholder="Crie uma senha segura"
-                required
+                {...register("senha")}
+                className={errors.senha ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.senha && <p className="text-sm text-red-500">{errors.senha.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirmar Senha</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirme sua senha"
-                required
+                {...register("confirmPassword")}
+                className={errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+              )}
             </div>
           </div>
 
+          {/* Biografia */}
           <div className="space-y-2">
             <Label htmlFor="biografia">Biografia</Label>
             <Textarea
               id="biografia"
-              value={formData.biografia}
-              onChange={handleChange}
               placeholder="Descreva brevemente o que sua empresa faz..."
-              className="min-h-[120px]"
-              required
+              className={`min-h-[120px] ${errors.biografia ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              {...register("biografia")}
             />
+            {errors.biografia && <p className="text-sm text-red-500">{errors.biografia.message}</p>}
           </div>
 
+          {/* Links */}
           <div className="space-y-2">
             <Label htmlFor="links">Links</Label>
             <Textarea
               id="links"
-              value={formData.links}
-              onChange={handleChange}
               placeholder="Site oficial, redes sociais, etc."
               className="min-h-[80px]"
+              {...register("links")}
             />
           </div>
         </fieldset>
 
-        {error && (
+        {apiError && (
           <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
-            {error}
+            {apiError}
           </div>
         )}
 
@@ -241,7 +241,6 @@ export function CompanyRegistrationForm() {
           </Button>
           <Button
             type="submit"
-            variant="destructive"
             className="w-full md:w-auto bg-red-400 hover:bg-red-500"
             disabled={isLoading}
           >

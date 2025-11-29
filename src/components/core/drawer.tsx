@@ -60,7 +60,7 @@ export function SideBar({ onLogout }: SideBarProps) {
 
         {/* Links de Navegação */}
         <nav className="mt-8 flex flex-col gap-2">
-          <SidebarLink href="/home" icon={<Home className="h-5 w-5" />}>
+          <SidebarLink href="/home/user" icon={<Home className="h-5 w-5" />}>
             Home
           </SidebarLink>
           <SidebarLink href="/vagas" icon={<Briefcase className="h-5 w-5" />}>

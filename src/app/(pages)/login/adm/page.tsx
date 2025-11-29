@@ -51,7 +51,6 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      console.log("Login Administrativo enviado:", { email, rememberMe });
       const credentials: LoginCredentials = { email, password };
       const data = await authService.login(credentials);
       
@@ -235,7 +234,7 @@ export default function AdminLoginPage() {
           {/* Rodapé Simples */}
           <div className="w-full flex justify-center pt-8 border-t border-[#C1C7CD]/50">
             <span className="text-xs text-[#697077] text-center">
-              Acesso restrito. © {new Date().getFullYear()} Seu Sistema.
+              Acesso restrito. © {new Date().getFullYear()} SARA Emprega.
             </span>
           </div>
         </div>

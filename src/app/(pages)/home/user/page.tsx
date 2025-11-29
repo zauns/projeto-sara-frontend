@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { useRequireAuth } from "../../../hooks/useProtectedRoute";
-import { useAuth } from "../../../contexts/AuthContext";
-import SessionInfo from "../../../components/SessionInfo";
+import { useRequireAuth } from "../../../../hooks/useProtectedRoute";
+import { useAuth } from "../../../../contexts/AuthContext";
+import SessionInfo from "../../../../components/SessionInfo";
 import { SearchBar } from "@/components/core/search-bar";
 import { JobCard } from "@/components/core/job-card";
 import { GuideCard } from "@/components/core/guide-card";

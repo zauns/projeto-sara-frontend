@@ -27,7 +27,7 @@ const VagasCategorySelector: React.FC<CategorySelectorProps> = ({
     // Isso garante que todos os filhos (botões e separadores)
     // se estiquem para preencher a altura total do container.
     <div className="bg-white flex items-stretch border-b border-gray-300">
-      {categories.map((category, index) => (
+      {categories.map((category) => (
         <React.Fragment key={category}>
           <button
             onClick={() => handleCategoryClick(category)}

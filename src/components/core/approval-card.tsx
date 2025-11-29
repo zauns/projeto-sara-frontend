@@ -7,11 +7,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserProfile } from "../../services/userServices";
+import { UserProfileGeneric } from "../../services/userServices";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 type ApprovalCardProps = {
-  profile: UserProfile;
+  profile: UserProfileGeneric;
   onApprove: (id: string) => void;
 };
 
@@ -25,7 +25,7 @@ export function ApprovalCard({ profile, onApprove }: ApprovalCardProps) {
       <CardHeader>
         <CardTitle className="text-lg text-black">{profile.nome}</CardTitle>
         <CardDescription className="text-gray-700 capitalize">
-          {profile.tipoConta === "EMPRESA"
+          {profile.tipoConta === "Empresa"
             ? "Empresa"
             : "Secretaria de Município"}
         </CardDescription>

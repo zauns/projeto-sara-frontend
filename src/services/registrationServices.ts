@@ -9,7 +9,7 @@ export interface CompanyRegistrationData {
   endereco: string;
   cnpj: string;
   biografia: string;
-  links: string; // Pode ser um JSON stringificado ou um campo de texto simples
+  links: string | undefined; // Pode ser um JSON stringificado ou um campo de texto simples
 }
 
 // Interface para os dados de cadastro da secretaria
@@ -20,6 +20,14 @@ export interface DepartmentRegistrationData {
   telefone: string;
   endereco: string;
   municipio: string;
+}
+
+export interface UserRegistrationData {
+  name: string;
+  email: string;
+  password: string;
+  telefone: string;
+  endereco: string;
 }
 
 /**
@@ -47,6 +55,7 @@ const registerDepartment = async (
   departmentData: DepartmentRegistrationData,
 ) => {
   try {
+    
     const response = await api.post("/secretaria", departmentData);
     return response.data;
   } catch (error) {
@@ -55,7 +64,18 @@ const registerDepartment = async (
   }
 };
 
+const registerUser = async (userData: UserRegistrationData) => {
+  try {
+    const response = await api.post("/api/user/create", userData);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao registrar usuário:", error);
+    throw error;
+  }
+};
+
 export const registrationService = {
   registerCompany,
   registerDepartment,
+  registerUser,
 };

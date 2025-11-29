@@ -5,17 +5,16 @@ import { useRequireAuth } from "../../../../hooks/useProtectedRoute";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { Header } from "@/components/core/header";
 import { approvalService } from "../../../../services/approvalServices";
-import { UserProfile } from "../../../../services/userServices";
+import { UserProfileGeneric } from "../../../../services/userServices";
 import { ApprovalCard } from "../../../../components/core/approval-card";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { tokenUtils } from "@/utils/cookies";
 
 const AdminHome = () => {
   const { isLoading, canAccess } = useRequireAuth();
   const { logout } = useAuth();
-  const [pendingCompanies, setPendingCompanies] = useState<UserProfile[]>([]);
-  const [pendingSecretaries, setPendingSecretaries] = useState<UserProfile[]>(
+  const [pendingCompanies, setPendingCompanies] = useState<UserProfileGeneric[]>([]);
+  const [pendingSecretaries, setPendingSecretaries] = useState<UserProfileGeneric[]>(
     [],
   );
   const [loadingApprovals, setLoadingApprovals] = useState(true);
@@ -41,9 +40,9 @@ const AdminHome = () => {
     }
   }, [canAccess]);
 
-  const handleApprove = async (id: string, type: "company" | "secretary") => {
+  const handleApprove = async (id: string, type: "Empresa" | "Secretaria") => {
     try {
-      if (type === "company") {
+      if (type === "Empresa") {
         await approvalService.approveCompany(id);
         setPendingCompanies((current) => current.filter((c) => c.id !== id));
         toast.success("Empresa aprovada com sucesso!");
@@ -93,7 +92,7 @@ const AdminHome = () => {
                 <ApprovalCard
                   key={company.id}
                   profile={company}
-                  onApprove={(id) => handleApprove(id, "company")}
+                  onApprove={(id) => handleApprove(id, "Empresa")}
                 />
               ))
             ) : (
@@ -113,7 +112,7 @@ const AdminHome = () => {
                 <ApprovalCard
                   key={secretary.id}
                   profile={secretary}
-                  onApprove={(id) => handleApprove(id, "secretary")}
+                  onApprove={(id) => handleApprove(id, "Secretaria")}
                 />
               ))
             ) : (

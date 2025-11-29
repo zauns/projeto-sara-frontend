@@ -15,14 +15,25 @@ const publicEndpoints = [
   '/secretaria',
 ];
 
-// Endpoints privados (exceções dos públicos) - strings ou regex
+
 const privateEndpoints: (string | RegExp)[] = [
   '/empresa/pendentes',
   '/empresa/aprovar',
   '/secretaria/pendentes',
   '/secretaria/aprovar',
-  /^\/empresa\/[^/]+$/,
-  /^\/secretaria\/[^/]+$/, // /empresa/{id} - match exato com um ID
+  '/api/user/create',
+
+  // --- Regex para Rotas Dinâmicas (Nível 1 - ex: /empresa/{id}) ---
+  /^\/empresa\/[^/]+$/,        
+  /^\/secretaria\/[^/]+$/,     
+  /^\/administrador\/[^/]+$/,  
+  /^\/api\/user\/[^/]+$/,       
+
+  // --- Regex para Rotas Dinâmicas de DADOS (Nível 2 - ex: /empresa/dados/{id}) ---
+  /^\/administrador\/dados\/[^/]+$/,  // Cobre: /administrador/dados/${id}
+  /^\/api\/user\/dados\/[^/]+$/,      // Cobre: /api/user/dados/${id}
+  /^\/secretaria\/dados\/[^/]+$/,     // Cobre: /secretaria/dados/${id}
+  /^\/empresa\/dados\/[^/]+$/         // Cobre: /empresa/dados/${id}
 ];
 
 const matchesPrivateEndpoint = (url: string): boolean => {
@@ -30,7 +41,7 @@ const matchesPrivateEndpoint = (url: string): boolean => {
     if (endpoint instanceof RegExp) {
       return endpoint.test(url);
     }
-    return url === endpoint || url.startsWith(endpoint + '/');
+    return url === endpoint;
   });
 };
 
