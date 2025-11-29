@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRequireAuth } from "@/hooks/useProtectedRoute"; // Ajuste o caminho conforme sua estrutura
 import { useAuth } from "@/contexts/AuthContext"; // Ajuste o caminho conforme sua estrutura
 import { Header } from "@/components/core/header"; // Ajuste o caminho conforme sua estrutura
@@ -16,6 +16,8 @@ const SecretaryHome = () => {
   
   // Obtendo o usuário logado e função de logout do contexto
   const { logout, userDetails } = useAuth();  
+  
+
 
   // Exibe loading enquanto verifica autenticação
   if (isLoading) {

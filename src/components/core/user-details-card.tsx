@@ -6,15 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserProfile } from "@/services/userServices";
 
-export interface UserProfile {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: string;
-  tipoConta: string;
-}
 
 export function StandardUserDetailsCard({ user }: { user?: UserProfile | null }) {
   const { updateUser } = useAuth();
@@ -54,10 +47,6 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
                 <Label>ID (Sistema)</Label>
                 <Input value={user?.id || ""} disabled />
             </div>
-            <div className="space-y-2">
-                <Label>Tipo de Conta</Label>
-                <Input value={user?.tipoConta || ""} disabled className="bg-gray-100" />
-            </div>
         </div>
 
         <div className="space-y-2">
@@ -87,7 +76,7 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
           {isEditing ? (
              <Button onClick={handleSave}>Salvar</Button> 
           ) : (
-             <Button variant="outline" onClick={() => setIsEditing(true)}>Editar</Button>
+             <Button onClick={() => setIsEditing(true)}>Editar</Button>
           )}
         </div>
       </CardContent>

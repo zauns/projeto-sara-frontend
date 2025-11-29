@@ -9,14 +9,14 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { tokenUtils, userDataUtils } from "../utils/cookies";
-import { UserProfile, UserProfileGeneric, userService } from "../services/userServices";
+import { EmpresaProfile,SecretariaProfile, UserProfile, UserProfileGeneric, userService } from "../services/userServices";
 import { UserTokenPayload } from "../services/authServices";
 
 interface AuthContextType {
   user: UserProfileGeneric | null;
   userDetails: unknown | null;
   token: string | null;
-  role: string | null; // Adicionado para expor a role no contexto
+  role: string | null; 
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (
@@ -25,7 +25,7 @@ interface AuthContextType {
     rememberMe?: boolean,
   ) => Promise<void>;
   logout: () => void;
-  updateUser: (userData: Partial<unknown>) => Promise<void>; // Agora retorna uma Promise
+  updateUser: (userData: Partial<unknown>) => Promise<void>; 
 }
 
 // Criar Contexto
@@ -55,31 +55,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Verifica se há sessão existente ao montar
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => { // Note que agora é async
       try {
-        // Verifica token e dados do usuário
         const storedToken = tokenUtils.getAuthToken();
-        const storedUser = userDataUtils.getUserData() as UserProfile | null;
-        // Recupera a role salva (necessário persistir para sobreviver ao refresh)
-        const storedRole = localStorage.getItem("user_role"); 
-
+        // Ajuste de tipagem aqui para garantir acesso ao ID se necessário
+        const storedUser = userDataUtils.getUserData() as UserProfileGeneric | null; 
+        const storedRole = localStorage.getItem("user_role");
+  
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(storedUser);
+          
           if (storedRole) {
             setRole(storedRole);
+            let details = null;
+            
+            const userId = storedUser.id; 
+  
+            if (userId) {
+              switch (storedRole) {
+                case "ROLE_SECRETARIA":
+                  details = await userService.getProfileSecretaria(userId);
+                  break;
+                case "ROLE_EMPRESA":
+                  details = await userService.getProfileEmpresa(userId);
+                  break;
+                case "ROLE_ADMIN":
+                case "ROLE_SUPER_ADMIN":
+                  details = await userService.getProfileAdmin(userId);
+                  break;
+                case "ROLE_USER":
+                  details = await userService.getProfileUser(userId);
+                  break;
+              }
+              setUserDetails(details);
+            }
           }
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
+        // Se der erro ao buscar os detalhes (ex: token expirado na API), faz logout
         tokenUtils.removeAuthToken();
         userDataUtils.removeUserData();
         localStorage.removeItem("user_role");
+        setUser(null);
+        setUserDetails(null);
+        setToken(null);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     initializeAuth();
   }, []);
 
@@ -180,18 +206,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Atualiza dados do usuário (Backend + Frontend)
-  const updateUser = async (userData: Partial<UserProfileGeneric>) => {
+  const updateUser = async (userData: unknown) => {
     if (!user || !user?.id) return;
 
     try {
-      // 1. Identifica a role e chama o serviço específico de atualização
+      let updatedUserDetails;
+
       switch (role) {
         case "ROLE_EMPRESA":
           // Supõe-se que userService tenha esses métodos implementados
-          await userService.updateProfileEmpresa(user.id, userData as UserProfile);
+          updatedUserDetails = await userService.updateProfileEmpresa(user.id, userData as EmpresaProfile);
           break;
         case "ROLE_SECRETARIA":
-          await userService.updateProfileSecretaria(user.id, userData as UserProfile);
+          updatedUserDetails = await userService.updateProfileSecretaria(user.id, userData as SecretariaProfile);
           break;
         case "ROLE_ADMIN":
         case "ROLE_SUPER_ADMIN":
@@ -199,20 +226,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // await userService.updateProfileAdmin(user.id, userData as UserProfile);
           break;
         case "ROLE_USER":
-          // await userService.updateProfileUser(user.id, userData as UserProfile);
+          userService.updateProfileUser(user.id, userData as UserProfile);
           break;
         default:
-          console.warn("Role não identificada para atualização específica, atualizando apenas localmente.");
+          console.warn("Role não identificada para atualização específica.");
       }
 
       // 2. Se a API respondeu ok, atualiza o estado local
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-
-      // 3. Atualiza persistência local
-      const currentStorageType = userDataUtils.getStorageType();
-      const rememberMe = currentStorageType === "persistent";
-      userDataUtils.setUserData(updatedUser, rememberMe);
+      setUserDetails(updatedUserDetails);
 
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);

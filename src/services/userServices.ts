@@ -1,5 +1,5 @@
 import { api } from "../api/axios";
-import { CompanyRegistrationData, DepartmentRegistrationData } from "./registrationServices";
+import { CompanyRegistrationData, } from "./registrationServices";
 
 // Interface que reflete os dados REAIS que vêm do Backend
 // Isso é mais detalhado que o token JWT
@@ -26,7 +26,6 @@ export interface UserProfile {
   email: string;
   telefone: string;
   endereco: string;
-  tipoConta: string;
 }
 
 export interface EmpresaProfile {
@@ -45,6 +44,7 @@ export interface SecretariaProfile {
   telefone: string;
   endereco: string;
   municipio: string;
+  senha: string | null;
 }
 
 
@@ -98,7 +98,9 @@ export const userService = {
   async getProfileSecretaria(id: string): Promise<SecretariaProfile> {
     try {
       // O endpoint real pode ser /users/{id} ou similar
+      // 
       const response = await api.get<SecretariaProfile>(`/secretaria/dados/${id}`);
+      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar perfil do usuário", error);
@@ -116,9 +118,10 @@ export const userService = {
     }
   },
 
-  async updateProfileSecretaria(id: string, data: Partial<DepartmentRegistrationData>): Promise<UserProfileGeneric> {
+  async updateProfileSecretaria(id: string, data: Partial<SecretariaProfile>): Promise<SecretariaProfile> {
     try {
-      const response = await api.put<UserProfileGeneric>(`/secretaria/${id}`, data);
+      console.log(data)
+      const response = await api.put<SecretariaProfile>(`/secretaria/${id}`, data);
       return response.data;
     } catch (error) {
       console.error("Erro ao atualizar perfil da secretaria", error);
@@ -135,4 +138,15 @@ export const userService = {
       throw error;
     }
   },
+  
+  async updateProfileUser(id: string, data: Partial<UserProfile>): Promise<UserProfile> {
+      try {
+        // Ajuste o endpoint conforme sua rota de backend (ex: PUT /api/user/{id} ou PATCH)
+        const response = await api.put<UserProfile>(`/api/user/${id}`, data);
+        return response.data;
+      } catch (error) {
+        console.error("Erro ao atualizar perfil do usuário", error);
+        throw error;
+      }
+    },
 }

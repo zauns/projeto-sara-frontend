@@ -6,14 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-
-export interface SecretariaProfile {
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: string;
-  municipio: string;
-}
+import { SecretariaProfile } from "@/services/userServices";
 
 export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | null }) {
   const { updateUser } = useAuth();
@@ -24,7 +17,8 @@ export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | nul
     email: "",
     telefone: "",
     endereco: "",
-    municipio: ""
+    municipio: "",
+    senha: ""
   });
 
   useEffect(() => {
@@ -35,6 +29,7 @@ export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | nul
         telefone: user.telefone || "",
         endereco: user.endereco || "",
         municipio: user.municipio || "",
+        senha: user.senha || "a"
       });
     }
   }, [user]);
@@ -89,7 +84,7 @@ export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | nul
           {isEditing ? (
              <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">Confirmar</Button> 
           ) : (
-             <Button variant="outline" onClick={() => setIsEditing(true)}>Alterar Dados</Button>
+             <Button onClick={() => setIsEditing(true)}>Alterar Dados</Button>
           )}
         </div>
       </CardContent>

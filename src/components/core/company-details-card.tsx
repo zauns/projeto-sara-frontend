@@ -7,16 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea"; // Importante ter este componente
 import { useAuth } from "@/contexts/AuthContext";
-
-export interface EmpresaProfile {
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: string;
-  cnpj: string;
-  biografia: string;
-  links: string;
-}
+import { EmpresaProfile } from "@/services/userServices";
 
 export function EmpresaDetailsCard({ user }: { user?: EmpresaProfile | null }) {
   const { updateUser } = useAuth();
@@ -109,7 +100,7 @@ export function EmpresaDetailsCard({ user }: { user?: EmpresaProfile | null }) {
           {isEditing ? (
              <Button className="w-full" onClick={handleSave}>Salvar Alterações</Button> 
           ) : (
-             <Button variant="outline" className="w-full" onClick={() => setIsEditing(true)}>Editar Dados da Empresa</Button>
+             <Button className="w-full" onClick={() => setIsEditing(true)}>Editar Dados da Empresa</Button>
           )}
         </div>
       </CardContent>
