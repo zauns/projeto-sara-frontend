@@ -9,7 +9,7 @@ export interface CompanyRegistrationData {
   endereco: string;
   cnpj: string;
   biografia: string;
-  links: string; // Pode ser um JSON stringificado ou um campo de texto simples
+  links: string | undefined; // Pode ser um JSON stringificado ou um campo de texto simples
 }
 
 // Interface para os dados de cadastro da secretaria
