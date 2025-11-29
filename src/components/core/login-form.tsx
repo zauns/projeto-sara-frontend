@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useAuth } from "../../../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import { authService, LoginCredentials } from "@/services/authServices";
 
-const LoginFormMobile: React.FC = () => {
+const LoginForm: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -17,6 +18,7 @@ const LoginFormMobile: React.FC = () => {
   }>({});
 
   const { login } = useAuth();
+  const router = useRouter();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -27,12 +29,8 @@ const LoginFormMobile: React.FC = () => {
     setErrorMessage(null);
 
     const errors: { email?: string; password?: string } = {};
-    if (!email.trim()) {
-      errors.email = "O campo de e-mail é obrigatório.";
-    }
-    if (!password.trim()) {
-      errors.password = "O campo de senha é obrigatório.";
-    }
+    if (!email.trim()) errors.email = "O campo de e-mail é obrigatório.";
+    if (!password.trim()) errors.password = "O campo de senha é obrigatório.";
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -43,14 +41,9 @@ const LoginFormMobile: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Simula o processo de login (substitua com sua chamada de API real posteriormente)
       const credentials: LoginCredentials = { email, password };
       const data = await authService.login(credentials);
-      console.log("Formulário enviado:", { email, password, rememberMe });
-
       login(data.user, data.token, rememberMe);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(
@@ -62,14 +55,13 @@ const LoginFormMobile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-[#FFF1EA]">
-      {/* Seção de Imagem do Cabeçalho */}
+    // Container limpo: sem min-h-screen forçado, adapta-se ao pai.
+    // Mantém w-full para ocupar a largura da coluna.
+    <div className="w-full flex flex-col">
+      {/* Seção de Imagem (Apenas Mobile) */}
       <div
-        className="w-full flex items-center justify-center bg-[#DDE1E6] bg-cover bg-center relative"
-        style={{
-          backgroundColor: "white",
-          minHeight: "221px",
-        }}
+        className="w-full flex md:hidden items-center justify-center bg-white bg-cover bg-center relative mb-8"
+        style={{ minHeight: "221px" }}
       >
         <Image
           src="/images/imagemLogin.png"
@@ -81,18 +73,18 @@ const LoginFormMobile: React.FC = () => {
         />
       </div>
 
-      {/* Seção do Formulário */}
-      <div className="flex flex-col gap-8 px-4 py-8 w-full max-w-md mx-auto">
+      {/* Conteúdo do Formulário */}
+      <div className="flex flex-col gap-8 px-4 pb-8 md:pb-0 w-full max-w-md md:max-w-lg mx-auto">
         {/* Título */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-[32px] font-bold text-[#21272A] leading-tight">
+          <h1 className="text-[32px] md:text-[40px] font-bold text-[#21272A] leading-tight">
             Log In
           </h1>
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Campo CPF */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-6">
+          {/* Campo Email */}
           <div className="flex flex-col gap-1">
             <div className="flex flex-col gap-2">
               <label
@@ -104,9 +96,9 @@ const LoginFormMobile: React.FC = () => {
               <input
                 id="email"
                 type="email"
-                placeholder="Digite seu Email"
+                placeholder="Digite seu E-mail"
                 value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={(e) => {
                   setEmail(e.target.value);
                   if (formErrors.email) {
                     setFormErrors((prev) => ({ ...prev, email: undefined }));
@@ -137,7 +129,7 @@ const LoginFormMobile: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Digite sua senha"
                   value={password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onChange={(e) => {
                     setPassword(e.target.value);
                     if (formErrors.password) {
                       setFormErrors((prev) => ({
@@ -154,7 +146,6 @@ const LoginFormMobile: React.FC = () => {
                   type="button"
                   onClick={togglePasswordVisibility}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#697077] hover:text-[#21272A] transition-colors"
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
                   {showPassword ? (
                     <FaEyeSlash size={24} />
@@ -197,7 +188,6 @@ const LoginFormMobile: React.FC = () => {
               </button>
             </div>
 
-            {/* Explicação do Lembrar de mim */}
             {rememberMe && (
               <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
                 <div className="flex items-start gap-2">
@@ -213,9 +203,7 @@ const LoginFormMobile: React.FC = () => {
                   <div className="text-xs text-blue-700">
                     <p className="font-medium mb-1">Sessão Estendida</p>
                     <p className="text-blue-600">
-                      Você permanecerá logado por 30 dias, mesmo após fechar o
-                      navegador. Desmarque esta opção se estiver usando um
-                      computador compartilhado.
+                      Você permanecerá logado por 30 dias.
                     </p>
                   </div>
                 </div>
@@ -229,7 +217,6 @@ const LoginFormMobile: React.FC = () => {
             </div>
           )}
 
-          {/* Botão de Login */}
           <button
             type="submit"
             disabled={isLoading}
@@ -239,20 +226,25 @@ const LoginFormMobile: React.FC = () => {
           </button>
         </form>
 
-        {/* Separador */}
         <div className="w-full h-px bg-[#C1C7CD]"></div>
 
-        {/* Botão de Cadastro */}
         <div className="flex flex-col gap-4">
           <button
             type="button"
+            onClick={() => router.push("/cadastro/empresa")}
             className="w-full px-3 py-4 bg-transparent border-2 border-[#F55F58] text-[#F55F58] text-base font-medium leading-none hover:bg-[#F55F58] hover:text-[#FFF1EA] transition-colors"
           >
             Cadastre-se como Empresa
           </button>
+          <button
+            type="button"
+            onClick={() => router.push("/cadastro/secretaria")}
+            className="w-full px-3 py-4 bg-transparent border-2 border-[#F55F58] text-[#F55F58] text-base font-medium leading-none hover:bg-[#F55F58] hover:text-[#FFF1EA] transition-colors"
+          >
+            Cadastre-se como Secretaria
+          </button>
         </div>
 
-        {/* Texto de Cadastro */}
         <span className="text-sm text-[#001D6C] leading-[1.4] text-left">
           Não possui uma conta? Siga as etapas e cadastre-se
         </span>
@@ -261,4 +253,4 @@ const LoginFormMobile: React.FC = () => {
   );
 };
 
-export default LoginFormMobile;
+export default LoginForm;

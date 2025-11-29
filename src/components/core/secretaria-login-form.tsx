@@ -13,9 +13,8 @@ export function SecretariaLoginForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login de Secretaria enviado");
-    // Redirecionar para página da secretaria (trocar para o link real depois)
-    router.push("/secretaria/dashboard"); 
+    // Redirecionar para o Painel Administrativo
+    router.push("/admin/dashboard"); 
   };
 
   return (

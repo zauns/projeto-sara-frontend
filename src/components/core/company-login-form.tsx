@@ -13,8 +13,7 @@ export function CompanyLoginForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login de Empresa enviado");
-    // Redirecionar para o a página da empresa (trocar para o link real depois)
+    // Redirecionar para o Dashboard da Empresa
     router.push("/company/dashboard"); 
   };
 

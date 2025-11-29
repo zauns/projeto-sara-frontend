@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { useRequireAuth } from "../../../hooks/useProtectedRoute";
-import { useAuth } from "../../../contexts/AuthContext";
-import SessionInfo from "../../../components/SessionInfo";
+import { useRequireAuth } from "../../../../hooks/useProtectedRoute";
+import { useAuth } from "../../../../contexts/AuthContext";
+import SessionInfo from "../../../../components/SessionInfo";
 import { SearchBar } from "@/components/core/search-bar";
 import { JobCard } from "@/components/core/job-card";
 import { GuideCard } from "@/components/core/guide-card";
@@ -113,7 +113,7 @@ const Home = () => {
                   <span className="text-sm font-medium text-gray-500">
                     Nome:
                   </span>
-                  <p className="text-sm text-gray-900">{user?.name || "N/A"}</p>
+                  <p className="text-sm text-gray-900">{user?.nome || "N/A"}</p>
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-500">

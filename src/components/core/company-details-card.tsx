@@ -1,109 +1,201 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, Phone, Mail, Link, MapPin, Briefcase } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/AuthContext";
+import { EmpresaProfile } from "@/services/userServices";
 
+const empresaSchema = z.object({
+  nome: z.string().min(3, "Razão social obrigatória"),
+  email: z.string().email("Email inválido"),
+  telefone: z
+    .string()
+    .regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Formato inválido: (99) 99999-9999"),
+  endereco: z.string().min(5, "Endereço obrigatório"),
+  biografia: z.string().min(10, "A biografia deve ter ao menos 10 caracteres"),
+  links: z.string().optional(), // Links são opcionais
+});
 
-// Props que o componente aceitará para exibir os dados
-type CompanyDetailsCardProps = {
-    companyName?: string;
-    cnpj?: string;
-    industry?: string;
-    address?: string;
-    companyEmail?: string;
-    companyPhone?: string;
-    socialLinks?: string[];
-    biographyContent?: string; 
-};
+type EmpresaFormValues = z.infer<typeof empresaSchema>;
 
-// Componente auxiliar para exibir pares de informação (Chave: Valor)
-const DisplayItem = ({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) => (
-    <div className="flex items-center gap-2 text-gray-700">
-        {icon}
-        <span className="font-medium w-28 flex-shrink-0 text-black">{label}:</span>
-        <span className="break-words">{value}</span>
-    </div>
-);
+export function EmpresaDetailsCard({ user }: { user?: EmpresaProfile | null }) {
+  const { updateUser } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
 
-export function CompanyDetailsCard(props: CompanyDetailsCardProps) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<EmpresaFormValues>({
+    resolver: zodResolver(empresaSchema),
+    mode: "onBlur",
+  });
 
-    // placeholders
-    const {
-        companyName = "Nome Fantasia (Não Informado)",
-        cnpj = "00.000.000/0001-XX",
-        industry = "Ramo de Atuação (N/A)",
-        address = "Endereço não cadastrado",
-        companyEmail = "contato@empresa.com.br",
-        companyPhone = "(00) 0000-0000",
-        socialLinks = [],
-        biographyContent = "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+  useEffect(() => {
+    if (user) {
+      reset({
+        nome: user.nome || "",
+        email: user.email || "",
+        telefone: user.telefone || "",
+        endereco: user.endereco || "",
+        biografia: user.biografia || "",
+        links: user.links || "",
+      });
+    }
+  }, [user, reset]);
 
-    } = props;
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+    v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+    setValue("telefone", v, { shouldValidate: true });
+  };
 
+  const onSubmit = async (data: EmpresaFormValues) => {
+    await updateUser(data);
+    setIsEditing(false);
+  };
 
-    return (
-        <div className="p-4">
-            <Card className="w-full bg-white shadow-md border-gray-200">
-                <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
-                    <CardTitle className="text-xl font-bold text-gray-900">
-                        Detalhes da Empresa
-                    </CardTitle>
-                    <Button
-                        variant="outline"
-                        className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
-                    >
-                        Editar Dados
-                    </Button>
-                </CardHeader>
+  return (
+    <Card className="w-full bg-white shadow-md">
+      <CardHeader>
+        <CardTitle>Dados da Empresa</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            {/* CNPJ (Read Only) */}
+            <div className="space-y-2">
+              <Label>CNPJ</Label>
+              <Input
+                value={user?.cnpj || ""}
+                disabled
+                className="bg-gray-100 cursor-not-allowed"
+              />
+              <p className="text-xs text-muted-foreground">
+                O CNPJ não pode ser alterado.
+              </p>
+            </div>
 
-                <CardContent className="p-6 space-y-6">
+            <div className="space-y-2">
+              <Label>Razão Social / Nome Fantasia</Label>
+              <Input
+                disabled={!isEditing}
+                {...register("nome")}
+                className={errors.nome ? "border-red-500" : ""}
+              />
+              {errors.nome && (
+                <p className="text-sm text-red-500">{errors.nome.message}</p>
+              )}
+            </div>
 
-                    {/* Informação da empresa */}
-                    <div className="space-y-3">
-                        <h3 className="text-lg font-semibold text-gray-800">Informações Básicas</h3>
-                        <DisplayItem label="Nome Fantasia" value={companyName} icon={<Globe className="h-4 w-4" />} />
-                        <DisplayItem label="CNPJ" value={cnpj} icon={<span className="h-4 w-4 flex items-center justify-center font-bold text-xs">C</span>} />
-                        <DisplayItem label="Ramo de Atuação" value={industry} icon={<Briefcase className="h-4 w-4" />} />
-                        <DisplayItem label="Endereço" value={address} icon={<MapPin className="h-4 w-4" />} />
-                    </div>
+            <div className="space-y-2">
+              <Label>Biografia / Sobre a Empresa</Label>
+              <Textarea
+                className={`min-h-[100px] ${
+                  errors.biografia ? "border-red-500" : ""
+                }`}
+                disabled={!isEditing}
+                {...register("biografia")}
+              />
+              {errors.biografia && (
+                <p className="text-sm text-red-500">
+                  {errors.biografia.message}
+                </p>
+              )}
+            </div>
 
-                    {/* Divisor */}
-                    <hr className="my-4 border-t border-gray-200" />
-                    
-                    {/* Bio */}
-                    <div className="space-y-3">
-                        <h3 className="text-lg font-semibold text-gray-900">Nossa Biografia e Compromisso</h3>
-                        <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                            {biographyContent}
-                        </p>
-                    </div>
+            <div className="space-y-2">
+              <Label>Links (Site, Redes Sociais)</Label>
+              <Input
+                placeholder="https://..."
+                disabled={!isEditing}
+                {...register("links")}
+              />
+            </div>
 
-                    {/* Divisor 2 */}
-                    <hr className="my-4 border-t border-gray-200" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Email Comercial</Label>
+                <Input
+                  disabled={!isEditing}
+                  {...register("email")}
+                  className={errors.email ? "border-red-500" : ""}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Telefone</Label>
+                <Input
+                  disabled={!isEditing}
+                  {...register("telefone")}
+                  onChange={handlePhoneChange}
+                  maxLength={15}
+                  className={errors.telefone ? "border-red-500" : ""}
+                />
+                {errors.telefone && (
+                  <p className="text-sm text-red-500">
+                    {errors.telefone.message}
+                  </p>
+                )}
+              </div>
+            </div>
 
-                    {/* Contatos e Links */}
-                    <div className="space-y-3">
-                        <h3 className="text-lg font-semibold text-gray-800">Contatos Corporativos</h3>
-                        <DisplayItem label="Email" value={companyEmail} icon={<Mail className="h-4 w-4" />} />
-                        <DisplayItem label="Telefone" value={companyPhone} icon={<Phone className="h-4 w-4" />} />
+            <div className="space-y-2">
+              <Label>Endereço</Label>
+              <Input
+                disabled={!isEditing}
+                {...register("endereco")}
+                className={errors.endereco ? "border-red-500" : ""}
+              />
+              {errors.endereco && (
+                <p className="text-sm text-red-500">{errors.endereco.message}</p>
+              )}
+            </div>
+          </div>
 
-                        {socialLinks.length > 0 && (
-                            <div className="pt-2">
-                                <h4 className="text-sm font-medium text-gray-600 mb-1">Links Externos:</h4>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1">
-                                    {socialLinks.map((link, index) => (
-                                        <a key={index} href={link} target="_blank" className="text-indigo-600 hover:text-indigo-800 text-sm flex items-center gap-1 transition-colors">
-                                            <Link className="h-4 w-4" />
-                                            {link.replace(/https?:\/\//, '').split('/')[0]}
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    );
+          <div className="pt-4 flex gap-3">
+            {isEditing ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setIsEditing(false);
+                    reset();
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                className="w-full"
+                onClick={() => setIsEditing(true)}
+              >
+                Editar Dados da Empresa
+              </Button>
+            )}
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
 }

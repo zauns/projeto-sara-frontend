@@ -1,52 +1,40 @@
 "use client";
-import React, { useEffect } from "react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useIsMobile } from "../../../hooks/useIsMobile";
-import { useAuth } from "../../../contexts/AuthContext";
-
-// Carregamento dinâmico dos componentes
-// após o hook saber o tamanho da tela.
-const MobileView = dynamic(() => import("./login.mobile"), {
-  ssr: false,
-});
-
-const DesktopView = dynamic(() => import("./login.desktop"), {
-  ssr: false,
-});
-
-// Um componente de "esqueleto" ou loader para mostrar durante o SSR
-// e antes da hidratação.
-const PageLoader = () => {
-  return <div className="min-h-screen" />; // Ou um spinner, skeleton, etc.
-};
+import Image from "next/image";
+import LoginForm from "../../../components/core/login-form";
+// 1. Importe o hook customizado
+import { useProtectedRoute } from "../../../hooks/useProtectedRoute";
 
 export default function Login() {
-  const isMobile = useIsMobile();
-  const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  // 2. Configure o hook para "Guest Only" (requireAuth: false)
+  // Definimos redirectTo como "/" para passar na verificação do hook 
+  // e permitir que o switch(role) faça o redirecionamento correto.
+  const { isAuthenticated, isLoading } = useProtectedRoute({
+    requireAuth: false,
+    redirectTo: "/", 
+  });
 
-  // Redireciona usuários autenticados para a página home
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.push("/home");
-    }
-  }, [isAuthenticated, isLoading, router]);
-
-  // Durante o SSR (isMobile === null), renderizamos o Loader.
-  // O cliente renderiza o Loader na primeira passagem.
-  // SEM INCOMPATIBILIDADE!
-  // Também mostra o loader enquanto verifica a autenticação
-  if (isMobile === null || isLoading) {
-    return <PageLoader />;
+  // 3. Mantém a tela branca enquanto carrega ou enquanto prepara o redirecionamento
+  if (isLoading || isAuthenticated) {
+    return <div className="min-h-screen bg-white" />;
   }
 
-  // Se o usuário está autenticado, mostra o loader enquanto redireciona
-  if (isAuthenticated) {
-    return <PageLoader />;
-  }
+  return (
+    <div className="flex min-h-screen w-full">
+      {/* LADO ESQUERDO (Apenas Desktop) */}
+      <div className="hidden md:flex md:w-[60%] relative bg-white items-center justify-center">
+        <Image
+          src="/images/imagemLogin.png"
+          alt="Imagem de Login Desktop"
+          fill
+          className="object-contain p-8"
+          priority
+        />
+      </div>
 
-  // Agora, no cliente, sabemos o tamanho e renderizamos a versão correta.
-  // O Next.js vai baixar apenas o chunk JS necessário.
-  return isMobile ? <MobileView /> : <DesktopView />;
+      {/* LADO DIREITO (Formulário) */}
+      <div className="w-full md:w-[40%] bg-[#FFF1EA] flex flex-col md:justify-center">
+        <LoginForm />
+      </div>
+    </div>
+  );
 }

@@ -23,19 +23,24 @@ export interface LoginCredentials {
 export const authService = {
     async login(credentials: LoginCredentials): Promise<LoginResponse> {
         try {
-            // Adaptação dos dados: Front (email) -> Back (espera 'username')
             const payload = {
                 username: credentials.email,
-                password: credentials.password 
+                password: credentials.password
             };
 
-            const response = await api.post<string>("/token", payload); // Axios parseia JSON auto, mas endpoint retorna token comos string
-            
-            // Se o backend retorna o token como string pura (text/plain)
+            //Configurar headers explicitamente
+            const response = await api.post("/token", payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
             const token = response.data;
-            
-            // Se o backend retornasse JSON { token: "..." }, seria response.data.token
-            
+
+            if (!token || typeof token !== 'string') {
+                throw new Error('Resposta inválida do servidor');
+            }
+
             const decodeUser = jwtDecode<UserTokenPayload>(token);
 
             return {
@@ -47,9 +52,9 @@ export const authService = {
                 // Tratamento específico de erro do Axios
                 const message = error.response?.data || error.message;
                 if (error.response?.status === 401 || error.response?.status === 403) {
-                     throw new Error("Credenciais inválidas ou conta pendente.");
+                     throw new Error(`Credenciais inválidas ou conta pendente. ${message}`);
                 }
-                throw new Error(typeof message === 'string' ? message : "Falha na autenticação");
+                throw new Error(error.response?.data?.message || "Falha na autenticação");
             }
             console.error("Erro inesperado no login", error);
             throw error;

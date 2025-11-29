@@ -1,5 +1,5 @@
 "use client";
-// Esqueleto genérico para AuthContext sem integração
+
 import React, {
   createContext,
   useContext,
@@ -9,21 +9,23 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { tokenUtils, userDataUtils } from "../utils/cookies";
-import { UserProfile, userService } from "../services/userServices";
+import { EmpresaProfile,SecretariaProfile, UserProfile, UserProfileGeneric, userService } from "../services/userServices";
 import { UserTokenPayload } from "../services/authServices";
 
 interface AuthContextType {
-  user: UserProfile | null;
+  user: UserProfileGeneric | null;
+  userDetails: unknown | null;
   token: string | null;
+  role: string | null; 
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (
     tokenPayload: UserTokenPayload,
     token: string,
     rememberMe?: boolean,
-  ) => void;
+  ) => Promise<void>;
   logout: () => void;
-  updateUser: (userData: Partial<UserProfile>) => void;
+  updateUser: (userData: Partial<unknown>) => Promise<void>; 
 }
 
 // Criar Contexto
@@ -44,33 +46,66 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfileGeneric | null>(null);
+  const [userDetails, setUserDetails] = useState<unknown | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null); // Estado para armazenar a role
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   // Verifica se há sessão existente ao montar
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => { // Note que agora é async
       try {
-        // Verifica token e dados do usuário (tanto localStorage quanto sessionStorage)
         const storedToken = tokenUtils.getAuthToken();
-        const storedUser = userDataUtils.getUserData() as UserProfile | null;
-
+        // Ajuste de tipagem aqui para garantir acesso ao ID se necessário
+        const storedUser = userDataUtils.getUserData() as UserProfileGeneric | null; 
+        const storedRole = localStorage.getItem("user_role");
+  
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(storedUser);
+          
+          if (storedRole) {
+            setRole(storedRole);
+            let details = null;
+            
+            const userId = storedUser.id; 
+  
+            if (userId) {
+              switch (storedRole) {
+                case "ROLE_SECRETARIA":
+                  details = await userService.getProfileSecretaria(userId);
+                  break;
+                case "ROLE_EMPRESA":
+                  details = await userService.getProfileEmpresa(userId);
+                  break;
+                case "ROLE_ADMIN":
+                case "ROLE_SUPER_ADMIN":
+                  details = await userService.getProfileAdmin(userId);
+                  break;
+                case "ROLE_USER":
+                  details = await userService.getProfileUser(userId);
+                  break;
+              }
+              setUserDetails(details);
+            }
+          }
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
-        // Limpa dados potencialmente corrompidos
+        // Se der erro ao buscar os detalhes (ex: token expirado na API), faz logout
         tokenUtils.removeAuthToken();
         userDataUtils.removeUserData();
+        localStorage.removeItem("user_role");
+        setUser(null);
+        setUserDetails(null);
+        setToken(null);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     initializeAuth();
   }, []);
 
@@ -81,61 +116,68 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     rememberMe: boolean = false,
   ) => {
     try {
-      // 1. Armazena o token primeiro para chamadas de API autenticadas
+      // 1. Armazena o token
       tokenUtils.setAuthToken(authToken, rememberMe);
       setToken(authToken);
-      console.log(tokenPayload)
+      
+      // 2. Define a role baseada no payload
+      setRole(tokenPayload.scope);
+      localStorage.setItem("user_role", tokenPayload.scope); // Persiste a role
+
+      // 3. Busca o perfil baseado na role
+      let userProfile: UserProfileGeneric;
+      let userProfileDetails: unknown
+
       switch (tokenPayload.scope) {
         case "ROLE_ADMIN":
-          setUser(await userService.getProfileAdmin(tokenPayload.userId));
-          break;
         case "ROLE_SUPER_ADMIN":
-          setUser(await userService.getProfileAdmin(tokenPayload.userId));
+          userProfile = await userService.getProfileGeneric(tokenPayload.userId, tokenPayload.scope);
+          userProfileDetails = await userService.getProfileAdmin(tokenPayload.userId);
           break;
         case "ROLE_USER":
-          setUser(await userService.getProfileUser(tokenPayload.userId));
+          userProfile = await userService.getProfileGeneric(tokenPayload.userId, tokenPayload.scope);
+          userProfileDetails = await userService.getProfileUser(tokenPayload.userId);
           break;
         case "ROLE_SECRETARIA":
-          setUser(await userService.getProfileSecretaria(tokenPayload.userId));
+          userProfile = await userService.getProfileGeneric(tokenPayload.userId, tokenPayload.scope);
+          userProfileDetails = await userService.getProfileSecretaria(tokenPayload.userId);
           break;
         case "ROLE_EMPRESA":
-          setUser(await userService.getProfileEmpresa(tokenPayload.userId));
+          userProfile = await userService.getProfileGeneric(tokenPayload.userId, tokenPayload.scope);
+          userProfileDetails = await userService.getProfileEmpresa(tokenPayload.userId);
           break;
         default:
           throw new Error("Invalid role");
       }
+      setUserDetails(userProfileDetails)
+      setUser(userProfile);
 
-      // 3. Define o estado e armazena os dados do usuário
-      userDataUtils.setUserData(user, rememberMe);
+      // 4. Armazena os dados do usuário
+      userDataUtils.setUserData(userProfile, rememberMe);
 
-      // Armazena o horário de login para cálculo de tempo restante
       if (rememberMe) {
         localStorage.setItem("login_time", new Date().getTime().toString());
       }
-
-      // Navega para a página home
+      // 5. Redirecionamento
       switch (tokenPayload.scope) {
         case "ROLE_SUPER_ADMIN":
-          router.push("/home/adm");
-          break;
         case "ROLE_ADMIN":
-          router.push("/home/adm");
+          router.replace("/home/adm");
           break;
         case "ROLE_USER":
-          router.push("/home");
-          break;
-        case "ROLE_SECRETARIA":
-          router.push("/home");
+          router.replace("/home/user");
           break;
         case "ROLE_EMPRESA":
-          router.push("/home");
+          router.replace("/home/empresa");
+          break;
+        case "ROLE_SECRETARIA":
+          router.replace("/home/secretaria");
           break;
         default:
-          throw new Error("Invalid role");
+          router.replace("/login");
       }
     } catch (error) {
       console.error("Error during login:", error);
-      // Em caso de erro ao buscar perfil, desloga para evitar estado inconsistente
       logout();
     }
   };
@@ -143,42 +185,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Função de logout
   const logout = () => {
     try {
-      // Limpa o estado
       setUser(null);
       setToken(null);
+      setRole(null);
 
-      // Limpa todos os dados armazenados (tokens e dados do usuário)
       tokenUtils.removeAuthToken();
       userDataUtils.removeUserData();
-
-      // Remove o horário de login
       localStorage.removeItem("login_time");
+      localStorage.removeItem("user_role"); // Remove a role persistida
 
-      // Navega para a página de login
       router.push("/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
-  // Atualiza dados do usuário
-  const updateUser = (userData: Partial<UserProfile>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      // Atualiza dados do usuário preservando a preferência do tipo de armazenamento
-      const currentStorageType = userDataUtils.getStorageType();
-      const rememberMe = currentStorageType === "persistent";
-      userDataUtils.setUserData(updatedUser, rememberMe);
+  // Atualiza dados do usuário (Backend + Frontend)
+  const updateUser = async (userData: unknown) => {
+    if (!user || !user?.id) return;
+
+    try {
+      let updatedUserDetails;
+
+      switch (role) {
+        case "ROLE_EMPRESA":
+          // Supõe-se que userService tenha esses métodos implementados
+          updatedUserDetails = await userService.updateProfileEmpresa(user.id, userData as EmpresaProfile);
+          break;
+        case "ROLE_SECRETARIA":
+          updatedUserDetails = await userService.updateProfileSecretaria(user.id, userData as SecretariaProfile);
+          break;
+        case "ROLE_ADMIN":
+        case "ROLE_SUPER_ADMIN":
+          // Exemplo caso existam métodos para admin
+          // await userService.updateProfileAdmin(user.id, userData as UserProfile);
+          break;
+        case "ROLE_USER":
+          updatedUserDetails = await userService.updateProfileUser(user.id, userData as UserProfile);
+          break;
+        default:
+          console.warn("Role não identificada para atualização específica.");
+      }
+
+      // 2. Se a API respondeu ok, atualiza o estado local
+      setUserDetails(updatedUserDetails);
+
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      throw error; // Re-lança o erro para que o componente de UI possa tratar (ex: mostrar toast de erro)
     }
   };
 
-  // Verifica se o usuário está autenticado
   const isAuthenticated = !!(user && token);
 
   const value: AuthContextType = {
     user,
+    userDetails,
     token,
+    role,
     isAuthenticated,
     isLoading,
     login,

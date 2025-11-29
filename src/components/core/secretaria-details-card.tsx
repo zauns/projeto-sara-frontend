@@ -10,11 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserProfile } from "@/services/userServices";
+import { SecretariaProfile } from "@/services/userServices";
 
-// 1. Schema de Validação
-const userSchema = z.object({
-  name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
+const secretariaSchema = z.object({
+  nome: z.string().min(3, "Nome obrigatório"),
+  municipio: z.string().min(2, "Município obrigatório"),
   email: z.string().email("Email inválido"),
   telefone: z
     .string()
@@ -22,29 +22,27 @@ const userSchema = z.object({
   endereco: z.string().min(5, "Endereço muito curto"),
 });
 
-type UserFormValues = z.infer<typeof userSchema>;
+type SecretariaFormValues = z.infer<typeof secretariaSchema>;
 
-export function StandardUserDetailsCard({ user }: { user?: UserProfile | null }) {
+export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | null }) {
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-
-  // 2. React Hook Form Setup
   const {
     register,
     handleSubmit,
     setValue,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<UserFormValues>({
-    resolver: zodResolver(userSchema),
+  } = useForm<SecretariaFormValues>({
+    resolver: zodResolver(secretariaSchema),
     mode: "onBlur",
   });
 
-  // Atualiza o formulário quando os dados do usuário chegam
   useEffect(() => {
     if (user) {
       reset({
-        name: user.name || "",
+        nome: user.nome || "",
+        municipio: user.municipio || "",
         email: user.email || "",
         telefone: user.telefone || "",
         endereco: user.endereco || "",
@@ -52,7 +50,6 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
     }
   }, [user, reset]);
 
-  // 3. Máscara de Telefone
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let v = e.target.value.replace(/\D/g, "");
     v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
@@ -60,42 +57,49 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
     setValue("telefone", v, { shouldValidate: true });
   };
 
-  const onSubmit = async (data: UserFormValues) => {
-    try {
-      await updateUser(data);
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Erro ao atualizar perfil", error);
-    }
+  const onSubmit = async (data: SecretariaFormValues) => {
+    await updateUser(data);
+    setIsEditing(false);
   };
 
   return (
-    <Card className="w-full bg-white shadow-md">
+    <Card className="w-full bg-white shadow-md border-l-4 border-l-blue-600">
       <CardHeader>
-        <CardTitle>Meus Dados</CardTitle>
+        <CardTitle>Dados da Secretaria</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
-            {/* Nome */}
             <div className="space-y-2">
-              <Label htmlFor="nome">Nome</Label>
+              <Label>Nome do Representante / Secretaria</Label>
               <Input
-                id="nome"
                 disabled={!isEditing}
-                {...register("name")}
-                className={errors.name ? "border-red-500" : ""}
+                {...register("nome")}
+                className={errors.nome ? "border-red-500" : ""}
               />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
+              {errors.nome && (
+                <p className="text-sm text-red-500">{errors.nome.message}</p>
               )}
             </div>
 
-            {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label>Município de Atuação</Label>
               <Input
-                id="email"
+                placeholder="Ex: São Paulo"
+                disabled={!isEditing}
+                {...register("municipio")}
+                className={errors.municipio ? "border-red-500" : ""}
+              />
+              {errors.municipio && (
+                <p className="text-sm text-red-500">
+                  {errors.municipio.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Email Oficial</Label>
+              <Input
                 disabled={!isEditing}
                 {...register("email")}
                 className={errors.email ? "border-red-500" : ""}
@@ -105,17 +109,12 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
               )}
             </div>
 
-            {/* Telefone */}
             <div className="space-y-2">
-              <Label htmlFor="telefone">Telefone</Label>
+              <Label>Telefone</Label>
               <Input
-                id="telefone"
                 disabled={!isEditing}
-                placeholder="(00) 00000-0000"
                 {...register("telefone")}
-                onChange={(e) => {
-                  handlePhoneChange(e);
-                }}
+                onChange={handlePhoneChange}
                 maxLength={15}
                 className={errors.telefone ? "border-red-500" : ""}
               />
@@ -124,11 +123,9 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
               )}
             </div>
 
-            {/* Endereço */}
             <div className="space-y-2">
-              <Label htmlFor="endereco">Endereço</Label>
+              <Label>Endereço da Sede</Label>
               <Input
-                id="endereco"
                 disabled={!isEditing}
                 {...register("endereco")}
                 className={errors.endereco ? "border-red-500" : ""}
@@ -139,7 +136,7 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
             </div>
           </div>
 
-          <div className="pt-4 flex gap-3">
+          <div className="pt-4 flex justify-end gap-3">
             {isEditing ? (
               <>
                 <Button
@@ -147,18 +144,22 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
                   variant="outline"
                   onClick={() => {
                     setIsEditing(false);
-                    reset(); // Restaura dados originais ao cancelar
+                    reset();
                   }}
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Salvando..." : "Salvar"}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isSubmitting ? "Salvando..." : "Confirmar"}
                 </Button>
               </>
             ) : (
               <Button type="button" onClick={() => setIsEditing(true)}>
-                Editar
+                Alterar Dados
               </Button>
             )}
           </div>

@@ -7,11 +7,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserProfile } from "../../services/userServices";
+import { UserProfileGeneric } from "../../services/userServices";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 type ApprovalCardProps = {
-  profile: UserProfile;
+  profile: UserProfileGeneric;
   onApprove: (id: string) => void;
 };
 
@@ -23,9 +23,9 @@ export function ApprovalCard({ profile, onApprove }: ApprovalCardProps) {
   return (
     <Card className="w-full bg-white flex flex-col h-full shadow-md hover:shadow-lg transition-shadow duration-200">
       <CardHeader>
-        <CardTitle className="text-lg text-black">{profile.name}</CardTitle>
+        <CardTitle className="text-lg text-black">{profile.nome}</CardTitle>
         <CardDescription className="text-gray-700 capitalize">
-          {profile.accountType === "EMPRESA"
+          {profile.tipoConta === "Empresa"
             ? "Empresa"
             : "Secretaria de Município"}
         </CardDescription>
@@ -37,11 +37,11 @@ export function ApprovalCard({ profile, onApprove }: ApprovalCardProps) {
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-800">
           <Phone className="h-4 w-4 text-gray-500" />
-          <span>{profile.telephone}</span>
+          <span>{profile.telefone}</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-800">
           <MapPin className="h-4 w-4 text-gray-500" />
-          <span className="truncate" title={profile.address}>{profile.address}</span>
+          <span className="truncate" title={profile.endereco}>{profile.endereco}</span>
         </div>
       </CardContent>
       <CardFooter>

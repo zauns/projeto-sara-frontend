@@ -1,10 +1,10 @@
 import { api } from "../api/axios";
-import { UserProfile } from "./userServices";
+import { UserProfileGeneric } from "./userServices";
 
 export const approvalService = {
-  async getPendingCompanies(): Promise<UserProfile[]> {
+  async getPendingCompanies(): Promise<UserProfileGeneric[]> {
     try {
-      const response = await api.get<UserProfile[]>("/empresa/pendentes");
+      const response = await api.get<UserProfileGeneric[]>("/empresa/pendentes");
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar empresas pendentes", error);
@@ -14,16 +14,16 @@ export const approvalService = {
 
   async approveCompany(id: string): Promise<void> {
     try {
-      await api.put(`/empresas/aprovar/${id}`);
+      await api.put(`/empresa/aprovar/${id}`);
     } catch (error) {
       console.error("Erro ao aprovar empresa", error);
       throw error;
     }
   },
 
-  async getPendingSecretaries(): Promise<UserProfile[]> {
+  async getPendingSecretaries(): Promise<UserProfileGeneric[]> {
     try {
-      const response = await api.get<UserProfile[]>("/secretaria/pendentes");
+      const response = await api.get<UserProfileGeneric[]>("/secretaria/pendentes");
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar secretarias pendentes", error);
@@ -33,7 +33,7 @@ export const approvalService = {
 
   async approveSecretary(id: string): Promise<void> {
     try {
-      await api.put(`/secretarias/aprovar/${id}`);
+      await api.put(`/secretaria/aprovar/${id}`);
     } catch (error) {
       console.error("Erro ao aprovar secretaria", error);
       throw error;
