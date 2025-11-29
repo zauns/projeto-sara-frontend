@@ -163,19 +163,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       switch (tokenPayload.scope) {
         case "ROLE_SUPER_ADMIN":
         case "ROLE_ADMIN":
-          console.log("login admin")
           router.replace("/home/adm");
           break;
         case "ROLE_USER":
-          console.log("login user")
           router.replace("/home/user");
           break;
         case "ROLE_EMPRESA":
-          console.log("login empresa")
           router.replace("/home/empresa");
           break;
         case "ROLE_SECRETARIA":
-          console.log("login secretaria")
           router.replace("/home/secretaria");
           break;
         default:
