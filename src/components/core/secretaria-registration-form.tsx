@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CompanyRegistrationSuccessDialog } from "@/components/core/company-registration-dialogue";
+// ATUALIZADO: Importação do diálogo genérico
+import { SuccessDialog } from "@/components/core/success-dialogue"; 
 import { registrationService } from "@/services/registrationServices";
 
 // 1. Schema (Secretaria)
@@ -69,10 +70,9 @@ export function SecretariaRegistrationForm() {
     setValue("telefone", v, { shouldValidate: true });
   };
 
-  // Integração manual do Select com React Hook Form
   const handleSelectChange = (value: string) => {
     setValue("municipio", value);
-    trigger("municipio"); // Força a validação para remover o erro visual se existir
+    trigger("municipio");
   };
 
   const onSubmit = async (data: SecretariaFormValues) => {
@@ -158,15 +158,12 @@ export function SecretariaRegistrationForm() {
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent className="bg-white max-h-[200px]">
-                {/* Lista simplificada para o exemplo */}
                 <SelectItem value="Sao Paulo">São Paulo</SelectItem>
                 <SelectItem value="Rio de Janeiro">Rio de Janeiro</SelectItem>
                 <SelectItem value="Recife">Recife</SelectItem>
                 <SelectItem value="Brasilia">Brasília</SelectItem>
-                {/* ... outros itens ... */}
               </SelectContent>
             </Select>
-            {/* Campo oculto para registrar no RHF se necessário, ou apenas use o setValue acima */}
             <input type="hidden" {...register("municipio")} />
             {errors.municipio && (
               <p className="text-sm text-red-500">{errors.municipio.message}</p>
@@ -242,10 +239,14 @@ export function SecretariaRegistrationForm() {
         </div>
       </form>
 
-      <CompanyRegistrationSuccessDialog
+      {/* ATUALIZADO: Implementação do SuccessDialog */}
+      <SuccessDialog
         isOpen={showSuccessDialog}
         onClose={() => setShowSuccessDialog(false)}
-        onGoToLogin={handleGoToLogin}
+        title="Secretaria Cadastrada!"
+        description="O cadastro da secretaria foi realizado com sucesso."
+        buttonText="Ir para Login"
+        onAction={() => handleGoToLogin("/login")}
       />
     </div>
   );

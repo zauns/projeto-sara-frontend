@@ -9,8 +9,9 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "../ui/textarea"; // Ajuste o caminho conforme seu projeto
-import { CompanyRegistrationSuccessDialog } from "./company-registration-dialogue";
+import { Textarea } from "../ui/textarea"; 
+// ATUALIZADO: Importação do diálogo genérico
+import { SuccessDialog } from "@/components/core/success-dialogue"; 
 import { CompanyRegistrationData, registrationService } from "@/services/registrationServices";
 
 // 1. Schema de Validação (Empresa)
@@ -249,10 +250,14 @@ export function CompanyRegistrationForm() {
         </div>
       </form>
 
-      <CompanyRegistrationSuccessDialog
+      {/* ATUALIZADO: Implementação do SuccessDialog */}
+      <SuccessDialog
         isOpen={showSuccessDialog}
         onClose={() => setShowSuccessDialog(false)}
-        onGoToLogin={handleGoToLogin}
+        title="Solicitação Enviada!"
+        description="O cadastro da sua empresa foi realizado com sucesso."
+        buttonText="Ir para Login"
+        onAction={() => handleGoToLogin("/login")}
       />
     </div>
   );

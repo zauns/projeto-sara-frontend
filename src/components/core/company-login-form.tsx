@@ -20,7 +20,6 @@ export function CompanyLoginForm() {
   return (
     <div className="w-full max-w-md mx-auto space-y-8">
       
-      {/* Cabeçalho idêntico ao da referência */}
       <div className="space-y-2 text-center md:text-left">
         <h1 className="text-3xl font-bold text-gray-900">Boas vindas</h1>
         <p className="text-gray-500">Entre com sua conta empresarial</p>
@@ -68,7 +67,7 @@ export function CompanyLoginForm() {
 
         <Button 
           type="submit" 
-          variant="destructive" // Botão vermelho padrão do seu projeto
+          variant="destructive"
           className="w-full bg-red-500 hover:bg-red-600 font-semibold h-11"
         >
           Entrar
@@ -76,7 +75,6 @@ export function CompanyLoginForm() {
 
         <div className="text-center text-sm text-gray-600">
           Ainda não tem uma conta?{" "}
-          {/* Link apontando para a rota de cadastro de empresa */}
           <a href="/register/company" className="font-bold text-red-500 hover:text-red-600">
             Cadastre-se
           </a>
