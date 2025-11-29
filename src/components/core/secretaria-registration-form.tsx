@@ -80,7 +80,7 @@ export function SecretariaRegistrationForm() {
     setApiError(null);
 
     try {
-      const { confirmPassword, ...apiData } = data;
+      const {  ...apiData } = data;
       await registrationService.registerDepartment(apiData);
       setShowSuccessDialog(true);
     } catch (err) {

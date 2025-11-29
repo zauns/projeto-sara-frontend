@@ -48,6 +48,7 @@ export default function ProfilePage() {
           // Se o seu sistema tiver múltiplos tipos de usuários acessando essa mesma página,
           // você pode usar a lógica de roles aqui ou usar getProfileGeneric(user.id, user.role)
           const data = await userService.getProfileUser(user.id);
+          console.log(data);
           setUserProfile(data);
         } catch (error) {
           console.error("Erro ao carregar perfil:", error);

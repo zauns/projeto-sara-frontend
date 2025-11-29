@@ -41,7 +41,7 @@ const matchesPrivateEndpoint = (url: string): boolean => {
     if (endpoint instanceof RegExp) {
       return endpoint.test(url);
     }
-    return url === endpoint || url.startsWith(endpoint + '/');
+    return url === endpoint;
   });
 };
 

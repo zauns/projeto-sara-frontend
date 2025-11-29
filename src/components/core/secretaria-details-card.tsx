@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,34 +12,54 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { SecretariaProfile } from "@/services/userServices";
 
+const secretariaSchema = z.object({
+  nome: z.string().min(3, "Nome obrigatório"),
+  municipio: z.string().min(2, "Município obrigatório"),
+  email: z.string().email("Email inválido"),
+  telefone: z
+    .string()
+    .regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Formato inválido: (99) 99999-9999"),
+  endereco: z.string().min(5, "Endereço muito curto"),
+});
+
+type SecretariaFormValues = z.infer<typeof secretariaSchema>;
+
 export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | null }) {
   const { updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    endereco: "",
-    municipio: "",
-    senha: ""
+  console.log(user)
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<SecretariaFormValues>({
+    resolver: zodResolver(secretariaSchema),
+    mode: "onBlur",
   });
 
   useEffect(() => {
     if (user) {
-      setFormData({
+      reset({
         nome: user.nome || "",
+        municipio: user.municipio || "",
         email: user.email || "",
         telefone: user.telefone || "",
         endereco: user.endereco || "",
-        municipio: user.municipio || "",
-        senha: user.senha || ""
       });
     }
-  }, [user]);
+  }, [user, reset]);
 
-  const handleSave = async () => {
-    await updateUser(formData);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+    v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+    setValue("telefone", v, { shouldValidate: true });
+  };
+
+  const onSubmit = async (data: SecretariaFormValues) => {
+    await updateUser(data);
     setIsEditing(false);
   };
 
@@ -45,48 +69,102 @@ export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | nul
         <CardTitle>Dados da Secretaria</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>Nome do Representante / Secretaria</Label>
-          <Input 
-            value={formData.nome} 
-            onChange={(e) => setFormData({...formData, nome: e.target.value})} 
-            disabled={!isEditing} 
-          />
-        </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nome do Representante / Secretaria</Label>
+              <Input
+                disabled={!isEditing}
+                {...register("nome")}
+                className={errors.nome ? "border-red-500" : ""}
+              />
+              {errors.nome && (
+                <p className="text-sm text-red-500">{errors.nome.message}</p>
+              )}
+            </div>
 
-        <div className="space-y-2">
-            <Label>Município de Atuação</Label>
-            {/* O Município pode ser editável ou fixo dependendo da regra de negócio. Deixei editável aqui. */}
-            <Input 
-                value={formData.municipio} 
-                onChange={(e) => setFormData({...formData, municipio: e.target.value})} 
-                disabled={!isEditing} 
+            <div className="space-y-2">
+              <Label>Município de Atuação</Label>
+              <Input
                 placeholder="Ex: São Paulo"
-            />
-        </div>
+                disabled={!isEditing}
+                {...register("municipio")}
+                className={errors.municipio ? "border-red-500" : ""}
+              />
+              {errors.municipio && (
+                <p className="text-sm text-red-500">
+                  {errors.municipio.message}
+                </p>
+              )}
+            </div>
 
-        <div className="space-y-2">
-            <Label>Email Oficial</Label>
-            <Input value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} disabled={!isEditing} />
-        </div>
-        
-        <div className="space-y-2">
-            <Label>Telefone</Label>
-            <Input value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} disabled={!isEditing} />
-        </div>
-        
-        <div className="space-y-2">
-            <Label>Endereço da Sede</Label>
-            <Input value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} disabled={!isEditing} />
-        </div>
+            <div className="space-y-2">
+              <Label>Email Oficial</Label>
+              <Input
+                disabled={!isEditing}
+                {...register("email")}
+                className={errors.email ? "border-red-500" : ""}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
 
-        <div className="pt-4 flex justify-end gap-3">
-          {isEditing ? (
-             <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">Confirmar</Button> 
-          ) : (
-             <Button onClick={() => setIsEditing(true)}>Alterar Dados</Button>
-          )}
-        </div>
+            <div className="space-y-2">
+              <Label>Telefone</Label>
+              <Input
+                disabled={!isEditing}
+                {...register("telefone")}
+                onChange={handlePhoneChange}
+                maxLength={15}
+                className={errors.telefone ? "border-red-500" : ""}
+              />
+              {errors.telefone && (
+                <p className="text-sm text-red-500">{errors.telefone.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Endereço da Sede</Label>
+              <Input
+                disabled={!isEditing}
+                {...register("endereco")}
+                className={errors.endereco ? "border-red-500" : ""}
+              />
+              {errors.endereco && (
+                <p className="text-sm text-red-500">{errors.endereco.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-4 flex justify-end gap-3">
+            {isEditing ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditing(false);
+                    reset();
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isSubmitting ? "Salvando..." : "Confirmar"}
+                </Button>
+              </>
+            ) : (
+              <Button type="button" onClick={() => setIsEditing(true)}>
+                Alterar Dados
+              </Button>
+            )}
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

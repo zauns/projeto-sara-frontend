@@ -81,7 +81,7 @@ export function CompanyRegistrationForm() {
     setApiError(null);
 
     try {
-      const { confirmPassword, ...apiData } = data;
+      const { ...apiData } = data;
       await registrationService.registerCompany(apiData as CompanyRegistrationData);
       setShowSuccessDialog(true);
     } catch (err) {

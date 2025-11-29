@@ -21,8 +21,7 @@ export interface AdminProfile {
 }
 
 export interface UserProfile {
-  id: string;
-  nome: string;
+  name: string;
   email: string;
   telefone: string;
   endereco: string;
@@ -87,8 +86,8 @@ export const userService = {
   },
   async getProfileUser(id: string): Promise<UserProfile> {
     try {
-      // O endpoint real pode ser /users/{id} ou similar
       const response = await api.get<UserProfile>(`/api/user/dados/${id}`);
+      console.log("userservices",response.data)
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar perfil do usuário", error);
@@ -120,6 +119,7 @@ export const userService = {
 
   async updateProfileSecretaria(id: string, data: Partial<SecretariaProfile>): Promise<SecretariaProfile> {
     try {
+      data.senha = null;
       console.log(data)
       const response = await api.put<SecretariaProfile>(`/secretaria/${id}`, data);
       return response.data;
