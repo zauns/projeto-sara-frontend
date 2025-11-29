@@ -7,14 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge"; // Sugestão para destacar o status
 import { useAuth } from "@/contexts/AuthContext";
+import { AdminProfile } from "@/services/userServices";
 
-export interface AdminProfile {
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: string;
-  isSuperAdmin: boolean;
-}
 
 interface AdminDetailsCardProps {
   user?: AdminProfile | null;
