@@ -40,9 +40,9 @@ const AdminHome = () => {
     }
   }, [canAccess]);
 
-  const handleApprove = async (id: string, type: "company" | "secretary") => {
+  const handleApprove = async (id: string, type: "Empresa" | "Secretaria") => {
     try {
-      if (type === "company") {
+      if (type === "Empresa") {
         await approvalService.approveCompany(id);
         setPendingCompanies((current) => current.filter((c) => c.id !== id));
         toast.success("Empresa aprovada com sucesso!");
@@ -92,7 +92,7 @@ const AdminHome = () => {
                 <ApprovalCard
                   key={company.id}
                   profile={company}
-                  onApprove={(id) => handleApprove(id, "company")}
+                  onApprove={(id) => handleApprove(id, "Empresa")}
                 />
               ))
             ) : (
@@ -112,7 +112,7 @@ const AdminHome = () => {
                 <ApprovalCard
                   key={secretary.id}
                   profile={secretary}
-                  onApprove={(id) => handleApprove(id, "secretary")}
+                  onApprove={(id) => handleApprove(id, "Secretaria")}
                 />
               ))
             ) : (

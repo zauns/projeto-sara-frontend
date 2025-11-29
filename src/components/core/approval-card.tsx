@@ -25,7 +25,7 @@ export function ApprovalCard({ profile, onApprove }: ApprovalCardProps) {
       <CardHeader>
         <CardTitle className="text-lg text-black">{profile.nome}</CardTitle>
         <CardDescription className="text-gray-700 capitalize">
-          {profile.tipoConta === "EMPRESA"
+          {profile.tipoConta === "Empresa"
             ? "Empresa"
             : "Secretaria de Município"}
         </CardDescription>
