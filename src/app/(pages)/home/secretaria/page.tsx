@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect } from "react";
 import { useRequireAuth } from "@/hooks/useProtectedRoute"; // Ajuste o caminho conforme sua estrutura
 import { useAuth } from "@/contexts/AuthContext"; // Ajuste o caminho conforme sua estrutura
 import { Header } from "@/components/core/header"; // Ajuste o caminho conforme sua estrutura
