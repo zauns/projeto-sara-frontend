@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Briefcase, Clock, Bookmark, Send, Building2 } from "lucide-react";
+import { MapPin, Briefcase, Clock, Bookmark, Send, Building2, Edit } from "lucide-react"; // Importe Edit
 import { SuccessDialog } from "@/components/core/success-dialogue";
 
 type JobDetailsCardProps = {
@@ -14,15 +14,26 @@ type JobDetailsCardProps = {
     companyName: string;
     companyLogoUrl?: string;
     location: string;
-    postedAt: string;
-    jobType: string;
-    modality: string;
-    level?: string;
+    postedAt: string; // Ex: "Publicado há 2 dias"
+    
+    // Tags / Badges
+    jobType: string;   // Ex: Tempo Integral
+    modality: string;  // Ex: Remoto
+    level?: string;    // Ex: Sênior
+    
+    // Conteúdo
     description: string;
     responsibilities?: string[];
     requirements?: string[];
-    isApplied?: boolean;
+    
+    // Ações da Usuária
     onApply?: () => void;
+    onSave?: () => void;
+    isApplied?: boolean; // Para mudar o estado do botão se já tiver aplicado
+
+    // --- Novos props (Modo Empresa) ---
+    isCompanyView?: boolean; // Se true, mostra modo de edição
+    onEdit?: () => void;     // Função chamada ao clicar em Editar
 };
 
 export function JobDetailsCard(props: JobDetailsCardProps) {
@@ -45,7 +56,7 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
         <>
             <Card className="w-full max-w-4xl mx-auto bg-white shadow-lg border-gray-200 overflow-hidden">
                 
-                {/* Cabeçalho */}
+                {/* --- CABEÇALHO (Igual) --- */}
                 <CardHeader className="p-6 md:p-8 bg-gray-50/50 border-b border-gray-100">
                     <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
                         
@@ -76,7 +87,6 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                                 </span>
                             </div>
 
-                            {/* Tags */}
                             <div className="flex flex-wrap gap-2 pt-2">
                                 <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
                                     {props.jobType}
@@ -94,7 +104,7 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                     </div>
                 </CardHeader>
 
-                {/* Conteúdo Principal */}
+                {/* --- Conteúdo --- */}
                 <CardContent className="p-6 md:p-8 space-y-8">
                     
                     <div className="space-y-3">
@@ -129,44 +139,58 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                     )}
                 </CardContent>
 
-                {/* Ações */}
+                {/* Rodapé */}
                 <CardFooter className="p-6 md:p-8 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row gap-4 justify-end">
                     
-                    <Button 
-                        variant="outline" 
-                        size="lg" 
-                        className={`w-full sm:w-auto border-gray-300 ${isSaved ? 'text-indigo-600 border-indigo-200 bg-indigo-50' : 'text-gray-700 hover:bg-white'}`}
-                        onClick={handleSaveToggle}
-                    >
-                        <Bookmark 
-                            className={`h-5 w-5 mr-2 ${isSaved ? 'fill-current' : ''}`} 
-                        />
-                        {isSaved ? "Vaga Salva" : "Salvar Vaga"}
-                    </Button>
+                    {props.isCompanyView ? (
+                        // Visão da empresa
+                        <Button 
+                            size="lg" 
+                            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700"
+                            onClick={props.onEdit}
+                        >
+                            <Edit className="h-5 w-5 mr-2" />
+                            Editar Vaga
+                        </Button>
+                    ) : (
+                        //VISÃO DA USUÁRIA
+                        <>
+                            <Button 
+                                variant="outline" 
+                                size="lg" 
+                                className={`w-full sm:w-auto border-gray-300 ${isSaved ? 'text-indigo-600 border-indigo-200 bg-indigo-50' : 'text-gray-700 hover:bg-white'}`}
+                                onClick={handleSaveToggle}
+                            >
+                                <Bookmark 
+                                    className={`h-5 w-5 mr-2 ${isSaved ? 'fill-current' : ''}`} 
+                                />
+                                {isSaved ? "Vaga Salva" : "Salvar Vaga"}
+                            </Button>
 
-                    <Button 
-                        size="lg" 
-                        className={`w-full sm:w-auto ${isApplied ? 'bg-green-600 hover:bg-green-700' : 'bg-red-500 hover:bg-red-600'}`}
-                        onClick={handleApplyClick}
-                        disabled={isApplied}
-                    >
-                        {isApplied ? (
-                            <>
-                                <span className="mr-2">Candidatura Enviada</span>
-                                <span className="text-xl">✓</span>
-                            </>
-                        ) : (
-                            <>
-                                <Send className="h-5 w-5 mr-2" />
-                                Candidatar-se agora
-                            </>
-                        )}
-                    </Button>
+                            <Button 
+                                size="lg" 
+                                className={`w-full sm:w-auto ${isApplied ? 'bg-green-600 hover:bg-green-700' : 'bg-red-500 hover:bg-red-600'}`}
+                                onClick={handleApplyClick}
+                                disabled={isApplied}
+                            >
+                                {isApplied ? (
+                                    <>
+                                        <span className="mr-2">Candidatura Enviada</span>
+                                        <span className="text-xl">✓</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="h-5 w-5 mr-2" />
+                                        Candidatar-se agora
+                                    </>
+                                )}
+                            </Button>
+                        </>
+                    )}
 
                 </CardFooter>
             </Card>
 
-            {/* Sucesso */}
             <SuccessDialog
                 isOpen={showSuccessDialog}
                 onClose={() => setShowSuccessDialog(false)}
