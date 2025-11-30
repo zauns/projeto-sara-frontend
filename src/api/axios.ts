@@ -2,7 +2,7 @@ import axios from "axios";
 import { tokenUtils } from "../utils/cookies";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080",
   headers: {
     "Content-Type": "application/json",
   },
@@ -24,10 +24,10 @@ const privateEndpoints: (string | RegExp)[] = [
   '/api/user/create',
 
   // --- Regex para Rotas Dinâmicas (Nível 1 - ex: /empresa/{id}) ---
-  /^\/empresa\/[^/]+$/,        
-  /^\/secretaria\/[^/]+$/,     
-  /^\/administrador\/[^/]+$/,  
-  /^\/api\/user\/[^/]+$/,       
+  /^\/empresa\/[^/]+$/,
+  /^\/secretaria\/[^/]+$/,
+  /^\/administrador\/[^/]+$/,
+  /^\/api\/user\/[^/]+$/,
 
   // --- Regex para Rotas Dinâmicas de DADOS (Nível 2 - ex: /empresa/dados/{id}) ---
   /^\/administrador\/dados\/[^/]+$/,  // Cobre: /administrador/dados/${id}
@@ -47,14 +47,13 @@ const matchesPrivateEndpoint = (url: string): boolean => {
 
 const isPublicEndpoint = (url: string | undefined): boolean => {
   if (!url) return false;
-  
+
   // Primeiro verifica se é um endpoint explicitamente privado
   if (matchesPrivateEndpoint(url)) {
     return false;
   }
-  
   // Depois verifica se é público (match exato ou começa com endpoint + /)
-  return publicEndpoints.some(endpoint => 
+  return publicEndpoints.some(endpoint =>
     url === endpoint || url.startsWith(endpoint + '/')
   );
 };
