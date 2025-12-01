@@ -25,9 +25,14 @@ export default function DebugRoutesPage() {
 
     // Rotas de página implementadas
     {
-      path: "/home",
+      path: "/home/user",
       description:
         "Página inicial do usuário autenticado com dashboard e informações de sessão",
+      status: "active",
+    },
+    {
+      path: "/home/adm",
+      description: "Página de administração da home",
       status: "active",
     },
     {
@@ -36,16 +41,41 @@ export default function DebugRoutesPage() {
         "Página de login com suporte a desktop e mobile, autenticação e remember me",
       status: "active",
     },
+    {
+      path: "/login/adm",
+      description: "Página de login de administrador",
+      status: "active",
+    },
+    {
+      path: "/cadastro/empresa",
+      description: "Página de cadastro de empresa",
+      status: "active",
+    },
+    {
+      path: "/cadastro/secretaria",
+      description: "Página de cadastro de secretaria",
+      status: "active",
+    },
+    {
+      path: "/perfil",
+      description: "Página de perfil do usuário",
+      status: "active",
+    },
+    {
+      path: "/vagas",
+      description: "Página de listagem de vagas",
+      status: "active",
+    },
+    {
+      path: "/vagas/1",
+      description: "Página de detalhes de uma vaga",
+      status: "active",
+    },
 
     // Rotas comuns que você pode querer adicionar
     {
       path: "/perfil/curriculo",
       description: "Página de criação e edição de currículo do usuário",
-      status: "planned",
-    },
-    {
-      path: "/perfil",
-      description: "Página de perfil do usuário",
       status: "planned",
     },
 

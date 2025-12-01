@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { User, Upload } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 interface ProfilePhotoCardProps {
   profileImageUrl?: string;

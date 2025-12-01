@@ -1,15 +1,24 @@
 import React, { useState } from "react";
+import Image from "next/image";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useAuth } from "../../../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { authService, LoginCredentials } from "@/services/authServices";
 
-const LoginFormDesktop: React.FC = () => {
-  const [cpf, setCpf] = useState<string>("");
+const LoginForm: React.FC = () => {
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
 
   const { login } = useAuth();
+  const router = useRouter();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -17,64 +26,91 @@ const LoginFormDesktop: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErrorMessage(null);
+
+    const errors: { email?: string; password?: string } = {};
+    if (!email.trim()) errors.email = "O campo de e-mail é obrigatório.";
+    if (!password.trim()) errors.password = "O campo de senha é obrigatório.";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
     setIsLoading(true);
 
     try {
-      // Simula o processo de login (substitua com sua chamada de API real posteriormente)
-      console.log("Formulário enviado:", { cpf, password, rememberMe });
-
-      // Dados de usuário e token simulados (substitua com a resposta real da API)
-      const mockUserData = {
-        id: "123",
-        name: "João Silva",
-        email: cpf.includes("@") ? cpf : "user@example.com",
-        cpf: cpf.includes("@") ? "" : cpf,
-        role: "user",
-      };
-
-      const mockToken = "mock-jwt-token-" + Date.now();
-
-      // Usa a função de login do AuthContext
-      login(mockUserData, mockToken, rememberMe);
-    } catch (error) {
+      const credentials: LoginCredentials = { email, password };
+      const data = await authService.login(credentials);
+      login(data.user, data.token, rememberMe);
+    } catch (error: any) {
       console.error("Login error:", error);
+      setErrorMessage(
+        error.message || "Email ou senha inválidos. Tente novamente.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="h-full flex flex-col justify-center px-8 py-12 bg-[#FFF1EA]">
-      {/* Container do Formulário */}
-      <div className="flex flex-col gap-8 w-full max-w-lg mx-auto">
+    // Container limpo: sem min-h-screen forçado, adapta-se ao pai.
+    // Mantém w-full para ocupar a largura da coluna.
+    <div className="w-full flex flex-col">
+      {/* Seção de Imagem (Apenas Mobile) */}
+      <div
+        className="w-full flex md:hidden items-center justify-center bg-white bg-cover bg-center relative mb-8"
+        style={{ minHeight: "221px" }}
+      >
+        <Image
+          src="/images/imagemLogin.png"
+          alt="imagemLogin"
+          width={393}
+          height={221}
+          className="object-contain"
+          priority
+        />
+      </div>
+
+      {/* Conteúdo do Formulário */}
+      <div className="flex flex-col gap-8 px-4 pb-8 md:pb-0 w-full max-w-md md:max-w-lg mx-auto">
         {/* Título */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-[40px] font-bold text-[#21272A] leading-tight">
+          <h1 className="text-[32px] md:text-[40px] font-bold text-[#21272A] leading-tight">
             Log In
           </h1>
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          {/* Campo CPF */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-6">
+          {/* Campo Email */}
           <div className="flex flex-col gap-1">
             <div className="flex flex-col gap-2">
               <label
-                htmlFor="cpf"
+                htmlFor="email"
                 className="text-sm text-[#21272A] leading-[1.4]"
               >
-                CPF
+                Email
               </label>
               <input
-                id="cpf"
-                type="text"
-                placeholder="Digite seu CPF"
-                value={cpf}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setCpf(e.target.value)
-                }
-                className="w-full px-4 py-3 text-base text-[#697077] bg-white border-b border-[#C1C7CD] focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]"
+                id="email"
+                type="email"
+                placeholder="Digite seu E-mail"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (formErrors.email) {
+                    setFormErrors((prev) => ({ ...prev, email: undefined }));
+                  }
+                }}
+                className={`w-full px-4 py-3 text-base text-[#697077] bg-white border-b ${
+                  formErrors.email ? "border-red-500" : "border-[#C1C7CD]"
+                } focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]`}
               />
+              {formErrors.email && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+              )}
             </div>
           </div>
 
@@ -93,16 +129,23 @@ const LoginFormDesktop: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Digite sua senha"
                   value={password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setPassword(e.target.value)
-                  }
-                  className="w-full px-4 py-3 pr-12 text-base text-[#697077] bg-white border-b border-[#C1C7CD] focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (formErrors.password) {
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        password: undefined,
+                      }));
+                    }
+                  }}
+                  className={`w-full px-4 py-3 pr-12 text-base text-[#697077] bg-white border-b ${
+                    formErrors.password ? "border-red-500" : "border-[#C1C7CD]"
+                  } focus:outline-none focus:border-[#F55F58] placeholder:text-[#697077]`}
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#697077] hover:text-[#21272A] transition-colors"
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
                   {showPassword ? (
                     <FaEyeSlash size={24} />
@@ -111,6 +154,11 @@ const LoginFormDesktop: React.FC = () => {
                   )}
                 </button>
               </div>
+              {formErrors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
           </div>
 
@@ -140,7 +188,6 @@ const LoginFormDesktop: React.FC = () => {
               </button>
             </div>
 
-            {/* Explicação do Lembrar de mim */}
             {rememberMe && (
               <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
                 <div className="flex items-start gap-2">
@@ -156,9 +203,7 @@ const LoginFormDesktop: React.FC = () => {
                   <div className="text-xs text-blue-700">
                     <p className="font-medium mb-1">Sessão Estendida</p>
                     <p className="text-blue-600">
-                      Você permanecerá logado por 30 dias, mesmo após fechar o
-                      navegador. Desmarque esta opção se estiver usando um
-                      computador compartilhado.
+                      Você permanecerá logado por 30 dias.
                     </p>
                   </div>
                 </div>
@@ -166,7 +211,12 @@ const LoginFormDesktop: React.FC = () => {
             )}
           </div>
 
-          {/* Botão de Login */}
+          {errorMessage && (
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {errorMessage}
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={isLoading}
@@ -176,20 +226,25 @@ const LoginFormDesktop: React.FC = () => {
           </button>
         </form>
 
-        {/* Separador */}
         <div className="w-full h-px bg-[#C1C7CD]"></div>
 
-        {/* Botão de Cadastro */}
         <div className="flex flex-col gap-4">
           <button
             type="button"
+            onClick={() => router.push("/cadastro/empresa")}
             className="w-full px-3 py-4 bg-transparent border-2 border-[#F55F58] text-[#F55F58] text-base font-medium leading-none hover:bg-[#F55F58] hover:text-[#FFF1EA] transition-colors"
           >
             Cadastre-se como Empresa
           </button>
+          <button
+            type="button"
+            onClick={() => router.push("/cadastro/secretaria")}
+            className="w-full px-3 py-4 bg-transparent border-2 border-[#F55F58] text-[#F55F58] text-base font-medium leading-none hover:bg-[#F55F58] hover:text-[#FFF1EA] transition-colors"
+          >
+            Cadastre-se como Secretaria
+          </button>
         </div>
 
-        {/* Texto de Cadastro */}
         <span className="text-sm text-[#001D6C] leading-[1.4] text-left">
           Não possui uma conta? Siga as etapas e cadastre-se
         </span>
@@ -198,4 +253,4 @@ const LoginFormDesktop: React.FC = () => {
   );
 };
 
-export default LoginFormDesktop;
+export default LoginForm;

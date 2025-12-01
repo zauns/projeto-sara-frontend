@@ -138,7 +138,7 @@ const SessionInfo: React.FC<SessionInfoProps> = ({
           <div className="flex justify-between text-xs">
             <span className="text-gray-500">Usuário:</span>
             <span className="text-gray-700 font-medium">
-              {user?.name || user?.email || "N/A"}
+              {user?.nome || user?.email || "N/A"}
             </span>
           </div>
 

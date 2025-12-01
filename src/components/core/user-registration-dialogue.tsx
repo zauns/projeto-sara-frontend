@@ -4,17 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check } from "lucide-react";
 
-type CompanyRegistrationSuccessDialogProps = {
+type UserRegistrationSuccessDialogProps = {
     isOpen: boolean;
     onClose: () => void;
     onGoToLogin: (path: string) => void;
 };
 
-export function CompanyRegistrationSuccessDialog({
+export function UserRegistrationSuccessDialog({
     isOpen,
     onClose,
     onGoToLogin,
-}: CompanyRegistrationSuccessDialogProps) {
+}: UserRegistrationSuccessDialogProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px] bg-white p-6 text-center">
@@ -24,10 +24,10 @@ export function CompanyRegistrationSuccessDialog({
                     </div>
 
                     <DialogTitle className="text-2xl font-bold mt-4">
-                        Cadastro Solicitado!
+                        Cadastro Concluído!
                     </DialogTitle>
                     <DialogDescription className="text-gray-600 mt-2">
-                        Sua solicitação foi recebida. Entraremos em contato em breve para informar os próximos passos.
+                        Sua conta foi criada com sucesso! Você já pode acessar a plataforma utilizando suas credenciais.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -38,7 +38,7 @@ export function CompanyRegistrationSuccessDialog({
                         className="w-full text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600"
                         onClick={() => onGoToLogin("/login")}
                     >
-                        Voltar para Login
+                        Ir para Login
                     </Button>
                 </div>
             </DialogContent>

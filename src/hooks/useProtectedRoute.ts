@@ -17,7 +17,7 @@ interface UseProtectedRouteOptions {
 export const useProtectedRoute = (options: UseProtectedRouteOptions = {}) => {
   const { redirectTo = "/login", requireAuth = true } = options;
 
-  const { user, token, isAuthenticated, isLoading } = useAuth();
+  const { user, token, isAuthenticated, isLoading, role } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -33,10 +33,27 @@ export const useProtectedRoute = (options: UseProtectedRouteOptions = {}) => {
     // Se a rota requer NÃO estar autenticado mas o usuário ESTÁ autenticado
     // (útil para páginas de login/registro)
     if (!requireAuth && isAuthenticated && redirectTo !== "/login") {
-      router.push("/home");
+      switch (role) {
+        case "ROLE_SUPER_ADMIN":
+        case "ROLE_ADMIN":
+          router.replace("home/adm")
+          break;
+        case "ROLE_USER":
+          router.replace("home/user")
+          break;
+        case "ROLE_EMPRESA":
+          router.replace("home/empresa")
+          break;
+        case "ROLE_SECRETARIA":
+          router.replace("home/secretaria")
+          break;
+        default:
+          router.replace("/")
+          break;
+      }
       return;
     }
-  }, [isAuthenticated, isLoading, requireAuth, redirectTo, router]);
+  }, [isAuthenticated, isLoading, requireAuth, redirectTo, router, role]);
 
   return {
     user,
@@ -54,9 +71,4 @@ export const useRequireAuth = () => {
   return useProtectedRoute({ requireAuth: true, redirectTo: "/login" });
 };
 
-/**
- * Hook especificamente para páginas que requerem NÃO estar autenticado (páginas de login/registro)
- */
-export const useRequireGuest = () => {
-  return useProtectedRoute({ requireAuth: false, redirectTo: "/home" });
-};
+

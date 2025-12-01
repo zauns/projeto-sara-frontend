@@ -1,0 +1,148 @@
+import { api } from "../api/axios";
+
+// Interface que reflete os dados REAIS que vêm do Backend
+// Isso é mais detalhado que o token JWT
+export interface UserProfileGeneric {
+  id: string;
+  nome: string; //mudei pro ContaResponse igual do back por desencargo de consciência
+  email: string;
+  telefone: string;
+  endereco: string;
+  tipoConta: string;
+}
+
+export interface AdminProfile {
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  isSuperAdmin: boolean;
+}
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+}
+
+export interface EmpresaProfile {
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  cnpj: string;
+  biografia: string;
+  links: string;
+}
+
+export interface SecretariaProfile {
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  municipio: string;
+  senha: string | null;
+}
+
+
+export const userService = {
+  async getProfileGeneric(id: string, role: string): Promise<UserProfileGeneric> {
+    try {
+      let response;
+      switch (role) {
+        case "ROLE_SUPER_ADMIN":
+        case "ROLE_ADMIN":
+          response = await api.get<UserProfileGeneric>(`/administrador/${id}`);
+          return response.data;
+        case "ROLE_USER":
+          response = await api.get<UserProfileGeneric>(`/api/user/${id}`);
+          return response.data;
+        case "ROLE_EMPRESA":
+          response = await api.get<UserProfileGeneric>(`/empresa/${id}`);
+          return response.data;
+        case "ROLE_SECRETARIA":
+          response = await api.get<UserProfileGeneric>(`/secretaria/${id}`);
+          return response.data;
+        default:
+          throw new Error("Role não suportada");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário", error);
+      throw error;
+    }
+  },
+  
+  async getProfileAdmin(id: string): Promise<AdminProfile> {
+    try {
+      // O endpoint real pode ser /users/{id} ou similar
+      const response = await api.get<AdminProfile>(`/administrador/dados/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário", error);
+      throw error;
+    }
+  },
+  async getProfileUser(id: string): Promise<UserProfile> {
+    try {
+      const response = await api.get<UserProfile>(`/api/user/dados/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário", error);
+      throw error;
+    }
+  },
+  async getProfileSecretaria(id: string): Promise<SecretariaProfile> {
+    try {
+      // O endpoint real pode ser /users/{id} ou similar
+      // 
+      const response = await api.get<SecretariaProfile>(`/secretaria/dados/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário", error);
+      throw error;
+    }
+  },
+  async getProfileEmpresa(id: string): Promise<EmpresaProfile> {
+    try {
+      // O endpoint real pode ser /users/{id} ou similar
+      const response = await api.get<EmpresaProfile>(`/empresa/dados/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário", error);
+      throw error;
+    }
+  },
+
+  async updateProfileSecretaria(id: string, data: Partial<SecretariaProfile>): Promise<SecretariaProfile> {
+    try {
+      data.senha = null;
+      const response = await api.put<SecretariaProfile>(`/secretaria/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar perfil da secretaria", error);
+      throw error;
+    }
+  },
+  
+  async updateProfileEmpresa(id: string, data: Partial<EmpresaProfile>): Promise<EmpresaProfile> {
+    try {
+      const response = await api.put<EmpresaProfile>(`/empresa/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar perfil da empresa", error);
+      throw error;
+    }
+  },
+  
+  async updateProfileUser(id: string, data: Partial<UserProfile>): Promise<UserProfile> {
+      try {
+        // Ajuste o endpoint conforme sua rota de backend (ex: PUT /api/user/{id} ou PATCH)
+        const response = await api.put<UserProfile>(`/api/user/${id}`, data);
+        return response.data;
+      } catch (error) {
+        console.error("Erro ao atualizar perfil do usuário", error);
+        throw error;
+      }
+    },
+}
