@@ -96,7 +96,7 @@ ${formData.requisitos}
 
     const handleSuccessAction = () => {
         setShowSuccessDialog(false);
-        router.push("/company/jobs");
+        router.push("/empresa/vagas");
     };
 
     return (
