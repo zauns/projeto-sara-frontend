@@ -35,7 +35,7 @@ const Home = () => {
     const safeTags = vaga.tags || [];
     return {
       titulo: vaga.titulo,
-      empresaNome: (vaga.empresa)?.nome || (vaga.empresa)?.name || "Empresa Parceira",
+      empresaNome: (vaga.empresa)?.nome || (vaga.empresa)?.nome || "Empresa Parceira",
       area: safeTags[0] || "Geral",
       tipo: safeTags[1] || "N/A",
       modalidade: safeTags[2] || "N/A",
