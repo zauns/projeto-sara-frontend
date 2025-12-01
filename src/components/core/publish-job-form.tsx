@@ -82,7 +82,6 @@ ${formData.requisitos}
                 tags: tagsGeradas,
                 isAtiva: false
             };
-            console.log(payload)
             await createJob(payload);
             
             setShowSuccessDialog(true);
