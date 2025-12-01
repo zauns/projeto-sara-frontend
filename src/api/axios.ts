@@ -9,35 +9,31 @@ const api = axios.create({
 });
 
 // Endpoints puramente públicos
-const publicEndpoints = [
-  '/token',
-  '/empresa',
-  '/secretaria',
-];
+const publicEndpoints = ["/token", "/empresa", "/secretaria"];
 
 // Endpoints puramente privados
 const privateEndpoints: (string | RegExp)[] = [
-  '/empresa/pendentes',
-  '/empresa/aprovar',
-  '/secretaria/pendentes',
-  '/secretaria/aprovar',
-  '/api/user/create',
+  "/empresa/pendentes",
+  /^\/empresa\/aprovar\/[^/]+$/,
+  "/secretaria/pendentes",
+  /^\/secretaria\/aprovar\/[^/]+$/,
+  "/api/user/create",
 
   // --- Regex para Rotas Dinâmicas (Nível 1) ---
-  /^\/empresa\/[^/]+$/,        
-  /^\/secretaria\/[^/]+$/,     
-  /^\/administrador\/[^/]+$/,  
-  /^\/api\/user\/[^/]+$/,       
+  /^\/empresa\/[^/]+$/,
+  /^\/secretaria\/[^/]+$/,
+  /^\/administrador\/[^/]+$/,
+  /^\/api\/user\/[^/]+$/,
 
   // --- Regex para Rotas Dinâmicas de DADOS (Nível 2) ---
-  /^\/administrador\/dados\/[^/]+$/, 
-  /^\/api\/user\/dados\/[^/]+$/,     
-  /^\/secretaria\/dados\/[^/]+$/,    
-  /^\/empresa\/dados\/[^/]+$/         
+  /^\/administrador\/dados\/[^/]+$/,
+  /^\/api\/user\/dados\/[^/]+$/,
+  /^\/secretaria\/dados\/[^/]+$/,
+  /^\/empresa\/dados\/[^/]+$/,
 ];
 
 const matchesPrivateEndpoint = (url: string): boolean => {
-  return privateEndpoints.some(endpoint => {
+  return privateEndpoints.some((endpoint) => {
     if (endpoint instanceof RegExp) {
       return endpoint.test(url);
     }
@@ -45,31 +41,35 @@ const matchesPrivateEndpoint = (url: string): boolean => {
   });
 };
 
-
 const isPublicEndpoint = (url: string | undefined, method: string | undefined): boolean => {
   if (!url) return false;
-  
-  const currentMethod = method ? method.toUpperCase() : 'GET';
+
+  // 1. Limpa a URL removendo query strings (?param=valor) para não quebrar o Regex
+  const cleanUrl = url.split("?")[0];
+  const currentMethod = method ? method.toUpperCase() : "GET";
 
   // --- LÓGICA ESPECÍFICA PARA VAGAS ---
-  // Verifica se a URL é exatamente /vagas ou /vagas/{id}
-  const isVagasRoot = /^\/vagas\/?$/.test(url);        // /vagas
-  const isVagasDetail = /^\/vagas\/[^/]+$/.test(url);  // /vagas/{id}
+  // Verifica se a URL limpa é exatamente /vagas ou /vagas/{id}
+  const isVagasRoot = /^\/vagas\/?$/.test(cleanUrl);      // /vagas ou /vagas/
+  const isVagasDetail = /^\/vagas\/[^/]+$/.test(cleanUrl); // /vagas/123
 
   if (isVagasRoot || isVagasDetail) {
-    // Se for rota de vagas, só é público se for GET.
-    // POST, PUT, DELETE retornarão false (exigindo token).
-    return currentMethod === 'GET';
+    // Se for rota de vagas, retornamos TRUE (público) apenas se for GET.
+    // Qualquer outro método (POST, DELETE) retornará false (privado/token necessário).
+    return currentMethod === "GET";
   }
-  
-  // 1. Se está na lista negra explícita, requer auth
-  if (matchesPrivateEndpoint(url)) {
+
+  // 2. Se está na lista negra explícita, requer auth
+  // Usamos cleanUrl aqui também para garantir que query params não burlem a segurança
+  if (matchesPrivateEndpoint(cleanUrl)) {
+    console.log(cleanUrl)
+    console.log("private")
     return false;
   }
-  
-  // 2. Se está na lista branca explícita, é público
-  return publicEndpoints.some(endpoint => 
-    url === endpoint || url.startsWith(endpoint + '/')
+
+  // 3. Se está na lista branca explícita, é público
+  return publicEndpoints.some(
+    (endpoint) => cleanUrl === endpoint || cleanUrl.startsWith(endpoint + "/")
   );
 };
 
@@ -80,6 +80,9 @@ api.interceptors.request.use(
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+    } else {
+      console.log(config.url)
+      console.log("public")
     }
 
     return config;
@@ -87,7 +90,7 @@ api.interceptors.request.use(
   (error) => {
     console.error("Erro no interceptor de request:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 export { api };

@@ -18,6 +18,15 @@ export interface VagaResponse {
   isAtiva: boolean;
 }
 
+export interface VagaCard {
+  titulo: string;
+  empresaNome: string;
+  area: string; // tags[0] sempre é a area
+  tipo: string; // tags[1] sempre é o tipo
+  modalidade: string; // tags[2] sempre é a modalidade
+  localizacao: string; // tags[3] sempre é a localizacao
+}
+
 export const jobService = {
   async createJob(data: VagaRequest) {
     try {
@@ -56,7 +65,7 @@ export const jobService = {
   
   async getJobsByEmpresaId(empresaId: string): Promise<VagaResponse[]> {
     try {
-      const response = await api.get(`/por-empresa?empresaId=${empresaId}`);
+      const response = await api.get(`/vagas/por-empresa?empresaId=${empresaId}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -81,7 +90,7 @@ export const jobService = {
     }
   },
 
-  /* 
+  // Descomentado e tipado para retornar a lista de Vagas
   async getAllJobs(): Promise<VagaResponse[]> {
     try {
       const response = await api.get('/vagas');
@@ -90,5 +99,4 @@ export const jobService = {
       throw error;
     }
   }
-  */
 }

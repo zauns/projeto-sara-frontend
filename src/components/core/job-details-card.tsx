@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Briefcase, Clock, Bookmark, Send, Building2, Edit } from "lucide-react"; // Importe Edit
+import { MapPin, Clock, Bookmark, Send, Building2, Edit } from "lucide-react"; // Importe Edit
 import { SuccessDialog } from "@/components/core/success-dialogue";
 
 type JobDetailsCardProps = {
@@ -146,10 +146,10 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                         // Visão da empresa
                         <Button 
                             size="lg" 
-                            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700"
+                            className="w-full sm:w-auto bg-[#F55F58] hover:bg-[#d94a44] text-white"
                             onClick={props.onEdit}
                         >
-                            <Edit className="h-5 w-5 mr-2" />
+                            <Edit className="h-5 w-5 mr-2 text-white" />
                             Editar Vaga
                         </Button>
                     ) : (
