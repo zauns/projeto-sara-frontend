@@ -101,7 +101,7 @@ const MinhasVagas = () => {
           
           {/* Botão opcional para criar nova vaga, já que estamos na área da empresa */}
           <Link 
-            href="/empresa/vagas/nova" 
+            href="/home/empresa" 
             className="flex items-center gap-2 bg-[#F55F58] text-white px-4 py-2 rounded-md hover:bg-[#d94a44] transition-colors text-sm font-medium"
           >
             <PlusCircle size={18} />

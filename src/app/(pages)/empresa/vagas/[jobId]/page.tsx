@@ -7,17 +7,32 @@ import { CandidateCard } from "@/components/core/candidate-card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Filter, Loader2, AlertTriangle } from "lucide-react";
 import { jobService, VagaResponse } from "@/services/jobServices";
+import { toast } from "@/hooks/use-toast"; 
 
 // Importações do Header e Auth
 import { Header } from "@/components/core/header";
 import { useAuth } from "@/contexts/AuthContext";
-// Importação do Hook de Proteção (Ajuste o caminho conforme sua estrutura de pastas)
-import { useRequireAuth } from "@/hooks/useProtectedRoute"; 
+import { useRequireAuth } from "@/hooks/useProtectedRoute";
 
-// Interface auxiliar para os dados processados
+// --- TIPAGEM ---
+
+// Tipo esperado pelo formulário do JobDetailsCard
+type JobFormValues = {
+  title: string;
+  location: string;
+  jobType: string;
+  modality: string;
+  level?: string;
+  description: string;
+  responsibilitiesArray: string[];
+  requirementsArray: string[];
+};
+
+// Interface auxiliar para os dados processados da vaga
 interface ParsedJobDetails {
   description: string;
   requirements: string[];
+  responsibilities: string[];
   location: string;
   salary: string | null;
 }
@@ -26,29 +41,25 @@ export default function CompanyJobManagePage() {
   const router = useRouter();
   const params = useParams();
   
-  // 1. Lógica de Proteção de Rota
-  // Isso garante que se o usuário deslogar ou não estiver autenticado, 
-  // ele será redirecionado para /login automaticamente.
+  // Auth Protection
   const { isLoading: authLoading } = useRequireAuth();
-  
-  // 2. Acesso à função de logout
   const { logout } = useAuth();
 
-  // Garante que o ID é uma string
   const jobId = Array.isArray(params.jobId) ? params.jobId[0] : params.jobId;
 
-  // Estados da página
+  // Estados
   const [job, setJob] = useState<VagaResponse | null>(null);
   const [parsedDetails, setParsedDetails] = useState<ParsedJobDetails | null>(null);
-  const [isJobLoading, setIsJobLoading] = useState(true); // Renomeado para evitar conflito
+  const [isJobLoading, setIsJobLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // --- LÓGICA DE PARSE ---
+  // --- LÓGICA DE PARSE (LEITURA) ---
   const parseJobDescription = (fullDescription: string, tags: string[]): ParsedJobDetails => {
     const details: ParsedJobDetails = {
       description: "",
       requirements: [],
-      location: tags[3] || "Remoto",
+      responsibilities: [],
+      location: tags[3] || "Remoto", // Tenta pegar da tag, fallback para texto
       salary: null,
     };
 
@@ -65,6 +76,8 @@ export default function CompanyJobManagePage() {
 
       if (sectionTitle.includes("requisitos")) {
         details.requirements = cleanLines.map((req) => req.replace(/^[-*]\s*/, ""));
+      } else if (sectionTitle.includes("responsabilidades")) {
+        details.responsibilities = cleanLines.map((resp) => resp.replace(/^[-*]\s*/, ""));
       } else if (sectionTitle.includes("detalhes")) {
         cleanLines.forEach((line) => {
           const lowerLine = line.toLowerCase();
@@ -82,7 +95,6 @@ export default function CompanyJobManagePage() {
   // --- BUSCAR DADOS DA API ---
   useEffect(() => {
     const fetchJob = async () => {
-      // Se a autenticação ainda estiver carregando, não busca a vaga ainda
       if (!jobId || authLoading) return;
 
       try {
@@ -104,16 +116,69 @@ export default function CompanyJobManagePage() {
     };
 
     fetchJob();
-  }, [jobId, authLoading]); // Adicionado authLoading às dependências
+  }, [jobId, authLoading]);
 
-  // --- HANDLERS ---
-  const handleLogout = () => {
-    logout();
-    // O hook useRequireAuth detectará a mudança de estado e fará o redirect automaticamente
+  // --- HANDLER DE ATUALIZAÇÃO (PUT) ---
+  const handleUpdateJob = async (formData: JobFormValues) => {
+    if (!job) return;
+
+    try {
+      // 1. Reconstrói a string 'descricao' com Markdown para o backend
+      let formattedDescription = formData.description;
+
+      if (formData.responsibilitiesArray.length > 0) {
+        formattedDescription += "\n\n### Responsabilidades\n";
+        formattedDescription += formData.responsibilitiesArray.map(item => `- ${item}`).join("\n");
+      }
+
+      if (formData.requirementsArray.length > 0) {
+        formattedDescription += "\n\n### Requisitos\n";
+        formattedDescription += formData.requirementsArray.map(item => `- ${item}`).join("\n");
+      }
+
+      // 2. Reconstrói as TAGS na ordem convencionada
+      // [0: Tipo, 1: Nível, 2: Modalidade, 3: Localização]
+      const updatedTags = [
+        formData.jobType,
+        formData.level || "",
+        formData.modality,
+        formData.location
+      ];
+
+      // 3. Monta payload
+      const payload = {
+        titulo: formData.title,
+        descricao: formattedDescription,
+        tags: updatedTags,
+        empresaId: job.empresa.id,
+        isAtiva: true,
+      };
+
+      // 4. Envia para API
+      const updatedJob = await jobService.updateJob(job.id, payload);
+
+      // 5. Atualiza estado local
+      setJob(updatedJob);
+      setParsedDetails(parseJobDescription(updatedJob.descricao, updatedJob.tags));
+
+      toast({
+        title: "Sucesso",
+        description: "Vaga atualizada com sucesso.",
+      });
+
+    } catch (error) {
+      console.error("Erro ao atualizar vaga:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar as alterações.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleEditJob = () => {
-    console.log("Abrir modal ou página de edição da vaga ID:", jobId);
+  // --- HANDLERS DE CANDIDATOS (MOCK) ---
+  const handleLogout = () => {
+    logout();
   };
 
   const handleViewProfile = (name: string) => {
@@ -122,13 +187,15 @@ export default function CompanyJobManagePage() {
 
   const handleApprove = (name: string) => {
     console.log(`Candidata ${name} aprovada para entrevista!`);
+    toast({ title: "Candidata Aprovada", description: `${name} avançou para a próxima etapa.` });
   };
 
   const handleReject = (name: string) => {
     console.log(`Candidata ${name} dispensada.`);
+    toast({ title: "Candidata Dispensada", description: `${name} foi arquivada.` });
   };
 
-  // --- DADOS MOCKADOS (Candidatos) ---
+  // Dados Mockados de Candidatos
   const candidates = [
     {
       id: "1",
@@ -153,9 +220,8 @@ export default function CompanyJobManagePage() {
     },
   ];
 
-  // --- RENDERIZAÇÃO CONDICIONAL ---
+  // --- RENDERIZAÇÃO ---
 
-  // Verifica tanto o loading da autenticação quanto o da vaga
   if (authLoading || isJobLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-custom-bg">
@@ -186,19 +252,25 @@ export default function CompanyJobManagePage() {
     );
   }
 
-  // Prepara os dados para o Card existente
+  // Prepara dados para o Card
   const jobDataForCard = {
     title: job.titulo,
     companyName: job.empresa.nome,
     companyLogoUrl: "https://github.com/shadcn.png", // Placeholder
+    
+    // Dados processados
     location: parsedDetails.location,
-    postedAt: "Recente", 
-    jobType: job.tags[0] || "Integral",
-    modality: job.tags.find(t => t.includes("híbrido") || t.includes("remoto")) || "Presencial",
-    level: job.tags[1] || "Pleno",
     description: parsedDetails.description,
-    responsibilities: [], 
+    responsibilities: parsedDetails.responsibilities,
     requirements: parsedDetails.requirements,
+    
+    // Tags (Lógica de leitura)
+    jobType: job.tags[0] || "Integral",
+    level: job.tags[1] || "Pleno",
+    // Tenta achar na posição 2 ou busca string na lista
+    modality: job.tags[2] || (job.tags.find(t => t.toLowerCase().includes("remoto") || t.toLowerCase().includes("híbrido")) || "Presencial"),
+    
+    postedAt: "Recente", 
   };
 
   return (
@@ -225,17 +297,19 @@ export default function CompanyJobManagePage() {
 
         {/* 2. Grid Layout Principal */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Coluna esquerda com detalhes da vaga */}
+          
+          {/* Coluna esquerda: Detalhes da Vaga (Editável) */}
           <div className="lg:col-span-7 xl:col-span-8 space-y-6">
             <JobDetailsCard
               {...jobDataForCard}
               isCompanyView={true}
-              onEdit={handleEditJob}
+              onUpdateJob={handleUpdateJob}
             />
           </div>
 
-          {/* Coluna direita com candidatas */}
+          {/* Coluna direita: Lista de Candidatas (Mock) */}
           <div className="lg:col-span-5 xl:col-span-4 space-y-6">
+            
             {/* Header da Lista */}
             <div className="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
               <h2 className="text-lg font-bold text-gray-900">Candidaturas</h2>
