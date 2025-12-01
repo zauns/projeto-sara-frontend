@@ -94,7 +94,7 @@ export const applicationService = {
       // O controller usa @RequestParam, então passamos como query params
       const response = await api.put<CandidaturaResponse>(`/candidaturas/${id}/status`, null, {
         params: {
-          status: status
+          status
         }
       });
       return response.data;
