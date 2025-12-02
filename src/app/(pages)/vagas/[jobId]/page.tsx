@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react"; // 1. Importe Suspense
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRequireAuth } from "@/hooks/useProtectedRoute";
@@ -12,6 +12,7 @@ import VagasCategorySelector from "@/components/core/job-categories";
 import { Loader2 } from "lucide-react";
 import { jobService, VagaResponse } from "@/services/jobServices";
 
+// Interface para o Card
 interface JobCardProps {
   titulo: string;
   empresaNome: string;
@@ -22,11 +23,12 @@ interface JobCardProps {
   companyLogoUrl?: string;
 }
 
-// 2. Renomeie o componente principal antigo para "VagasContent"
+// Componente interno que usa useSearchParams
 const VagasContent = () => {
   const { isLoading: isAuthLoading, canAccess } = useRequireAuth();
   const { logout } = useAuth();
   
+  // Hook para ler a URL (termos e tags)
   const searchParams = useSearchParams();
 
   const [selectedCategory, setSelectedCategory] = useState("Vagas");
@@ -42,30 +44,39 @@ const VagasContent = () => {
     logout();
   };
 
+  // --- EFEITO PRINCIPAL DE BUSCA E FILTRAGEM ---
   useEffect(() => {
     const fetchAndFilterJobs = async () => {
+      // Se ainda não tiver permissão, não busca nada
       if (!canAccess) return;
 
       try {
         setIsJobsLoading(true);
         setError(null);
 
+        // 1. Ler parâmetros da URL
         const queryTerm = searchParams.get("q");
         const queryTags = searchParams.get("tags");
 
         let data: VagaResponse[] = [];
 
+        // 2. Fazer a requisição à API (Filtro Macro)
         if (queryTerm) {
+          // Se tem termo de pesquisa, busca especificamente por ele
           data = await jobService.getJobsBySearch(queryTerm);
         } else {
+          // Se não tem termo, busca todas (para depois filtrar por tag se necessário)
           data = await jobService.getAllJobs();
         }
 
+        // 3. Filtragem Local por Tags (Refinamento)
         if (queryTags) {
-          const tagsList = queryTags.split(',');
+          const tagsList = queryTags.split(','); // Ex: ['Remoto', 'CLT']
           
           data = data.filter((vaga) => {
             const vagaTags = vaga.tags || [];
+            // Verifica se a vaga possui ALGUMA das tags selecionadas (Lógica OR)
+            // Se quiser que tenha TODAS (Lógica AND), troque .some() por .every()
             return vagaTags.some(tag => tagsList.includes(tag));
           });
         }
@@ -81,8 +92,11 @@ const VagasContent = () => {
     };
 
     fetchAndFilterJobs();
+  
+  // O useEffect roda sempre que a URL mudar (searchParams) ou a permissão mudar
   }, [canAccess, searchParams]);
 
+  // Função para adaptar dados para o componente visual
   const adaptJobToCard = (vaga: VagaResponse): JobCardProps => {
     const safeTags = vaga.tags || [];
     return {
@@ -92,10 +106,11 @@ const VagasContent = () => {
       tipo: safeTags[1] || "N/A",
       modalidade: safeTags[2] || "N/A",
       localizacao: safeTags[3] || "Remoto",
-      companyLogoUrl: ""
+      companyLogoUrl: "" // Adicionar lógica de avatar se existir no futuro
     };
   };
 
+  // Renderização de Loading da Auth
   if (isAuthLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-custom-bg">
@@ -119,12 +134,14 @@ const VagasContent = () => {
       />
 
       <main className="flex-grow max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 w-full">
+        {/* Barra de Pesquisa */}
         <div className="w-full flex justify-center mb-1">
           <div className="w-full max-w-2xl">
             <SearchBar />
           </div>
         </div>
 
+        {/* Listagem de Vagas */}
         {selectedCategory === "Vagas" && (
           <div className="space-y-2">
             {isJobsLoading ? (
@@ -138,6 +155,7 @@ const VagasContent = () => {
                 Nenhuma vaga encontrada com os filtros atuais.
               </div>
             ) : (
+              // Mapeia as vagas filtradas
               jobs.map((job) => {
                 const cardProps = adaptJobToCard(job);
                 return (
@@ -162,6 +180,7 @@ const VagasContent = () => {
           </div>
         )}
 
+        {/* Placeholders para outras categorias */}
         {selectedCategory === "Candidaturas" && (
            <div className="text-center py-10 text-gray-500">Funcionalidade em desenvolvimento.</div>
         )}
@@ -173,14 +192,16 @@ const VagasContent = () => {
   );
 };
 
-// 3. Crie o novo Default Export com o Suspense Boundary
-const VagasPage = () => {
+// Componente wrapper com Suspense
+const Vagas = () => {
   return (
-    // O fallback é o que aparece enquanto o next processa os parâmetros da URL
     <Suspense 
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-custom-bg">
-          <Loader2 className="animate-spin h-12 w-12 text-[#F55F58]" />
+          <div className="text-center">
+            <Loader2 className="animate-spin h-12 w-12 text-[#F55F58] mx-auto mb-4" />
+            <p className="text-gray-600">Carregando...</p>
+          </div>
         </div>
       }
     >
@@ -189,4 +210,4 @@ const VagasPage = () => {
   );
 };
 
-export default VagasPage;
+export default Vagas;
