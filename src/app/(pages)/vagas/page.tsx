@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRequireAuth } from "../../../hooks/useProtectedRoute";
@@ -23,7 +23,8 @@ interface JobCardProps {
   companyLogoUrl?: string;
 }
 
-const Vagas = () => {
+// Componente interno que usa useSearchParams
+const VagasContent = () => {
   const { isLoading: isAuthLoading, canAccess } = useRequireAuth();
   const { logout } = useAuth();
   
@@ -188,6 +189,24 @@ const Vagas = () => {
         )}
       </main>
     </div>
+  );
+};
+
+// Componente wrapper com Suspense
+const Vagas = () => {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-custom-bg">
+          <div className="text-center">
+            <Loader2 className="animate-spin h-12 w-12 text-[#F55F58] mx-auto mb-4" />
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      }
+    >
+      <VagasContent />
+    </Suspense>
   );
 };
 
