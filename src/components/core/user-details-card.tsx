@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/services/userServices";
 
-// 1. Schema de Validação
 const userSchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
   email: z.string().email("Email inválido"),
@@ -25,10 +24,10 @@ const userSchema = z.object({
 type UserFormValues = z.infer<typeof userSchema>;
 
 export function StandardUserDetailsCard({ user }: { user?: UserProfile | null }) {
-  const { updateUser } = useAuth();
+  const { updateUser, deleteAccount } = useAuth(); // Import deleteAccount
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // 2. React Hook Form Setup
   const {
     register,
     handleSubmit,
@@ -40,7 +39,6 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
     mode: "onBlur",
   });
 
-  // Atualiza o formulário quando os dados do usuário chegam
   useEffect(() => {
     if (user) {
       reset({
@@ -52,7 +50,6 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
     }
   }, [user, reset]);
 
-  // 3. Máscara de Telefone
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let v = e.target.value.replace(/\D/g, "");
     v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
@@ -69,15 +66,33 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
     }
   };
 
+  // Lógica de exclusão
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Tem certeza que deseja excluir sua conta permanentemente? Esta ação não pode ser desfeita."
+    );
+
+    if (confirmed) {
+      try {
+        setIsDeleting(true);
+        await deleteAccount();
+      } catch (error) {
+        console.error("Erro ao deletar conta", error);
+        alert("Erro ao excluir conta. Tente novamente.");
+        setIsDeleting(false);
+      }
+    }
+  };
+
   return (
     <Card className="w-full bg-white shadow-md">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Meus Dados</CardTitle>
+        {/* Botão de deletar no cabeçalho ou rodapé, aqui coloquei no cabeçalho para visibilidade ou pode ser um botão separado abaixo */}
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
-            {/* Nome */}
             <div className="space-y-2">
               <Label htmlFor="nome">Nome</Label>
               <Input
@@ -91,7 +106,6 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
               )}
             </div>
 
-            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -105,7 +119,6 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
               )}
             </div>
 
-            {/* Telefone */}
             <div className="space-y-2">
               <Label htmlFor="telefone">Telefone</Label>
               <Input
@@ -113,9 +126,7 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
                 disabled={!isEditing}
                 placeholder="(00) 00000-0000"
                 {...register("telefone")}
-                onChange={(e) => {
-                  handlePhoneChange(e);
-                }}
+                onChange={handlePhoneChange}
                 maxLength={15}
                 className={errors.telefone ? "border-red-500" : ""}
               />
@@ -124,7 +135,6 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
               )}
             </div>
 
-            {/* Endereço */}
             <div className="space-y-2">
               <Label htmlFor="endereco">Endereço</Label>
               <Input
@@ -139,28 +149,42 @@ export function StandardUserDetailsCard({ user }: { user?: UserProfile | null })
             </div>
           </div>
 
-          <div className="pt-4 flex gap-3">
-            {isEditing ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditing(false);
-                    reset(); // Restaura dados originais ao cancelar
-                  }}
+          <div className="pt-6 flex flex-col md:flex-row gap-3 justify-between items-center">
+            {/* Zona de Perigo - Botão Deletar */}
+            {!isEditing && (
+                <Button 
+                    type="button" 
+                    variant="destructive" 
+                    onClick={handleDelete}
+                    disabled={isDeleting}
                 >
-                  Cancelar
+                    {isDeleting ? "Excluindo..." : "Excluir Conta"}
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Salvando..." : "Salvar"}
-                </Button>
-              </>
-            ) : (
-              <Button type="button" onClick={() => setIsEditing(true)}>
-                Editar
-              </Button>
             )}
+
+            <div className="flex gap-3 w-full md:w-auto justify-end">
+                {isEditing ? (
+                <>
+                    <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                        setIsEditing(false);
+                        reset();
+                    }}
+                    >
+                    Cancelar
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Salvando..." : "Salvar"}
+                    </Button>
+                </>
+                ) : (
+                <Button type="button" onClick={() => setIsEditing(true)}>
+                    Editar
+                </Button>
+                )}
+            </div>
           </div>
         </form>
       </CardContent>

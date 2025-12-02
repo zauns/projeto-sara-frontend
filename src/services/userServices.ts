@@ -145,4 +145,29 @@ export const userService = {
         throw error;
       }
     },
+    
+    async deleteProfile(id: string, role: string): Promise<void> {
+      try {
+        switch (role) {
+          case "ROLE_SUPER_ADMIN":
+          case "ROLE_ADMIN":
+            await api.delete(`/administrador/${id}`);
+            break;
+          case "ROLE_USER":
+            await api.delete(`/api/user/${id}`);
+            break;
+          case "ROLE_EMPRESA":
+            await api.delete(`/empresa/${id}`);
+            break;
+          case "ROLE_SECRETARIA":
+            await api.delete(`/secretaria/${id}`);
+            break;
+          default:
+            throw new Error("Role não suportada");
+        }
+      } catch (error) {
+        console.error("Erro ao deletar perfil do usuário", error);
+        throw error;
+      }
+    }
 }

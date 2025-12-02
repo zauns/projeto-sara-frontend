@@ -176,6 +176,28 @@ export default function CompanyJobManagePage() {
     }
   };
 
+  // --- HANDLER DE DELEÇÃO (DELETE) ---
+  const handleDeleteJob = async (id: string) => {
+    try {
+      await jobService.deleteJob(id);
+      
+      toast({
+        title: "Vaga excluída",
+        description: "A vaga foi removida com sucesso.",
+      });
+
+      // Redireciona para o dashboard ou listagem para evitar erro 404
+      router.replace('/empresa/vagas');
+    } catch (error) {
+      console.error("Erro ao deletar vaga:", error);
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível remover a vaga. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // --- HANDLERS DE CANDIDATOS (MOCK) ---
   const handleLogout = () => {
     logout();
@@ -302,8 +324,13 @@ export default function CompanyJobManagePage() {
           <div className="lg:col-span-7 xl:col-span-8 space-y-6">
             <JobDetailsCard
               {...jobDataForCard}
+              
+              // PROPS DE DELEÇÃO ADICIONADAS
+              jobId={job.id}
+              onDeleteAction={handleDeleteJob}
+              
               isCompanyView={true}
-              onUpdateJob={handleUpdateJob}
+              onUpdateJobAction={handleUpdateJob}
             />
           </div>
 

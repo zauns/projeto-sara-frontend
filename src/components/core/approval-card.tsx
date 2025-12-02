@@ -21,7 +21,9 @@ export function ApprovalCard({ profile, onApprove }: ApprovalCardProps) {
   };
 
   return (
-    <Card className="w-full bg-white flex flex-col h-full shadow-md hover:shadow-lg transition-shadow duration-200">
+    // REMOVIDO: h-full
+    // ADICIONADO: h-fit (opcional, mas garante que não estique)
+    <Card className="w-full bg-white flex flex-col h-fit shadow-md hover:shadow-lg transition-shadow duration-200">
       <CardHeader>
         <CardTitle className="text-lg text-black">{profile.nome}</CardTitle>
         <CardDescription className="text-gray-700 capitalize">

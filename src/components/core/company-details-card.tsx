@@ -21,14 +21,15 @@ const empresaSchema = z.object({
     .regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Formato inválido: (99) 99999-9999"),
   endereco: z.string().min(5, "Endereço obrigatório"),
   biografia: z.string().min(10, "A biografia deve ter ao menos 10 caracteres"),
-  links: z.string().optional(), // Links são opcionais
+  links: z.string().optional(),
 });
 
 type EmpresaFormValues = z.infer<typeof empresaSchema>;
 
 export function EmpresaDetailsCard({ user }: { user?: EmpresaProfile | null }) {
-  const { updateUser } = useAuth();
+  const { updateUser, deleteAccount } = useAuth(); // Import deleteAccount
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     register,
@@ -66,6 +67,23 @@ export function EmpresaDetailsCard({ user }: { user?: EmpresaProfile | null }) {
     setIsEditing(false);
   };
 
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Tem certeza que deseja encerrar a conta da empresa? Todos os dados serão perdidos permanentemente."
+    );
+
+    if (confirmed) {
+      try {
+        setIsDeleting(true);
+        await deleteAccount();
+      } catch (error) {
+        console.error("Erro ao deletar conta", error);
+        alert("Erro ao excluir conta. Tente novamente.");
+        setIsDeleting(false);
+      }
+    }
+  };
+
   return (
     <Card className="w-full bg-white shadow-md">
       <CardHeader>
@@ -74,7 +92,6 @@ export function EmpresaDetailsCard({ user }: { user?: EmpresaProfile | null }) {
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
-            {/* CNPJ (Read Only) */}
             <div className="space-y-2">
               <Label>CNPJ</Label>
               <Input
@@ -166,33 +183,47 @@ export function EmpresaDetailsCard({ user }: { user?: EmpresaProfile | null }) {
             </div>
           </div>
 
-          <div className="pt-4 flex gap-3">
-            {isEditing ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setIsEditing(false);
-                    reset();
-                  }}
+          <div className="pt-6 flex flex-col md:flex-row gap-3 justify-between items-center">
+             {/* Zona de Perigo */}
+            {!isEditing && (
+                <Button 
+                    type="button" 
+                    variant="destructive" 
+                    onClick={handleDelete}
+                    disabled={isDeleting}
                 >
-                  Cancelar
+                    {isDeleting ? "Encerrando..." : "Encerrar Conta Empresarial"}
                 </Button>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "Salvando..." : "Salvar Alterações"}
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                className="w-full"
-                onClick={() => setIsEditing(true)}
-              >
-                Editar Dados da Empresa
-              </Button>
             )}
+
+            <div className="flex gap-3 w-full md:w-auto justify-end">
+                {isEditing ? (
+                <>
+                    <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full md:w-auto"
+                    onClick={() => {
+                        setIsEditing(false);
+                        reset();
+                    }}
+                    >
+                    Cancelar
+                    </Button>
+                    <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+                    {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+                    </Button>
+                </>
+                ) : (
+                <Button
+                    type="button"
+                    className="w-full md:w-auto"
+                    onClick={() => setIsEditing(true)}
+                >
+                    Editar Dados da Empresa
+                </Button>
+                )}
+            </div>
           </div>
         </form>
       </CardContent>
