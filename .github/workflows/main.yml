@@ -3,8 +3,8 @@ name: Release Frontend
 on:
   push:
     tags:
-      - "versão-*.*.*rc*"
-      - "versão-*.*.*"
+      - "v*.*.*rc*"
+      - "v*.*.*"
 
 env:
   REGISTRY: ghcr.io
