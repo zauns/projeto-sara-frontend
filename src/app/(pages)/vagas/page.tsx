@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useRequireAuth } from "../../../hooks/useProtectedRoute";
 import { useAuth } from "../../../contexts/AuthContext";
 import { SearchBar } from "@/components/core/search-bar";
@@ -11,7 +12,7 @@ import VagasCategorySelector from "@/components/core/job-categories";
 import { Loader2 } from "lucide-react";
 import { jobService, VagaResponse } from "../../../services/jobServices";
 
-// Interface esperada pelo componente JobCard (conforme sua especificação anterior)
+// Interface para o Card
 interface JobCardProps {
   titulo: string;
   empresaNome: string;
@@ -19,15 +20,17 @@ interface JobCardProps {
   tipo: string;
   modalidade: string;
   localizacao: string;
-  companyLogoUrl?: string; // Opcional, caso a empresa tenha logo
+  companyLogoUrl?: string;
 }
 
 const Vagas = () => {
   const { isLoading: isAuthLoading, canAccess } = useRequireAuth();
   const { logout } = useAuth();
-  const [selectedCategory, setSelectedCategory] = useState("Vagas");
   
-  // Estados para gerenciar as vagas vindas da API
+  // Hook para ler a URL (termos e tags)
+  const searchParams = useSearchParams();
+
+  const [selectedCategory, setSelectedCategory] = useState("Vagas");
   const [jobs, setJobs] = useState<VagaResponse[]>([]);
   const [isJobsLoading, setIsJobsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,13 +43,45 @@ const Vagas = () => {
     logout();
   };
 
-  // Busca as vagas ao carregar a página
+  // --- EFEITO PRINCIPAL DE BUSCA E FILTRAGEM ---
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchAndFilterJobs = async () => {
+      // Se ainda não tiver permissão, não busca nada
+      if (!canAccess) return;
+
       try {
         setIsJobsLoading(true);
-        const data = await jobService.getAllJobs();
+        setError(null);
+
+        // 1. Ler parâmetros da URL
+        const queryTerm = searchParams.get("q");
+        const queryTags = searchParams.get("tags");
+
+        let data: VagaResponse[] = [];
+
+        // 2. Fazer a requisição à API (Filtro Macro)
+        if (queryTerm) {
+          // Se tem termo de pesquisa, busca especificamente por ele
+          data = await jobService.getJobsBySearch(queryTerm);
+        } else {
+          // Se não tem termo, busca todas (para depois filtrar por tag se necessário)
+          data = await jobService.getAllJobs();
+        }
+
+        // 3. Filtragem Local por Tags (Refinamento)
+        if (queryTags) {
+          const tagsList = queryTags.split(','); // Ex: ['Remoto', 'CLT']
+          
+          data = data.filter((vaga) => {
+            const vagaTags = vaga.tags || [];
+            // Verifica se a vaga possui ALGUMA das tags selecionadas (Lógica OR)
+            // Se quiser que tenha TODAS (Lógica AND), troque .some() por .every()
+            return vagaTags.some(tag => tagsList.includes(tag));
+          });
+        }
+
         setJobs(data);
+
       } catch (err) {
         console.error("Erro ao buscar vagas:", err);
         setError("Não foi possível carregar as vagas no momento.");
@@ -55,31 +90,26 @@ const Vagas = () => {
       }
     };
 
-    if (canAccess) {
-      fetchJobs();
-    }
-  }, [canAccess]);
+    fetchAndFilterJobs();
+  
+  // O useEffect roda sempre que a URL mudar (searchParams) ou a permissão mudar
+  }, [canAccess, searchParams]);
 
-  // Função de transformação: VagaResponse (API) -> JobCardProps (Componente)
+  // Função para adaptar dados para o componente visual
   const adaptJobToCard = (vaga: VagaResponse): JobCardProps => {
-    // Garante que tags existam para evitar erro de undefined
     const safeTags = vaga.tags || [];
-
     return {
       titulo: vaga.titulo,
-      // Assume que UserProfileGeneric tem uma propriedade 'nome' ou 'name'. 
-      // Ajuste 'nome' conforme a estrutura real do seu UserProfileGeneric.
-      empresaNome: (vaga.empresa)?.nome || "Empresa Parceira", 
-      area: safeTags[0] || "Geral",          // tags[0] é a área
-      tipo: safeTags[1] || "N/A",            // tags[1] é o tipo
-      modalidade: safeTags[2] || "N/A",      // tags[2] é a modalidade
-      localizacao: safeTags[3] || "Remoto",  // tags[3] é a localização
-      // Se houver URL da logo no objeto empresa, adicione aqui:
-      companyLogoUrl: "" 
+      empresaNome: (vaga.empresa)?.nome || "Empresa Parceira",
+      area: safeTags[0] || "Geral",
+      tipo: safeTags[1] || "N/A",
+      modalidade: safeTags[2] || "N/A",
+      localizacao: safeTags[3] || "Remoto",
+      companyLogoUrl: "" // Adicionar lógica de avatar se existir no futuro
     };
   };
 
-  // Carregamento inicial de Auth
+  // Renderização de Loading da Auth
   if (isAuthLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-custom-bg">
@@ -91,25 +121,26 @@ const Vagas = () => {
     );
   }
 
-  if (!canAccess) {
-    return null;
-  }
+  if (!canAccess) return null;
 
   return (
     <div className="min-h-screen bg-custom-bg flex flex-col">
       <Header onLogout={handleLogout} />
+      
       <VagasCategorySelector
         onCategorySelect={handleCategorySelect}
         initialSelectedCategory="Vagas"
       />
+
       <main className="flex-grow max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 w-full">
+        {/* Barra de Pesquisa */}
         <div className="w-full flex justify-center mb-1">
           <div className="w-full max-w-2xl">
             <SearchBar />
           </div>
         </div>
 
-        {/* --- Vagas Principais (Vindas da API) --- */}
+        {/* Listagem de Vagas */}
         {selectedCategory === "Vagas" && (
           <div className="space-y-2">
             {isJobsLoading ? (
@@ -120,11 +151,11 @@ const Vagas = () => {
               <div className="text-center py-10 text-red-500">{error}</div>
             ) : jobs.length === 0 ? (
               <div className="text-center py-10 text-gray-500">
-                Nenhuma vaga encontrada.
+                Nenhuma vaga encontrada com os filtros atuais.
               </div>
             ) : (
-              // Aplica o limite de 10 vagas (slice)
-              jobs.slice(0, 10).map((job) => {
+              // Mapeia as vagas filtradas
+              jobs.map((job) => {
                 const cardProps = adaptJobToCard(job);
                 return (
                   <Link
@@ -148,20 +179,12 @@ const Vagas = () => {
           </div>
         )}
 
-        {/* --- Outras Categorias (Placeholder) --- */}
+        {/* Placeholders para outras categorias */}
         {selectedCategory === "Candidaturas" && (
-          <div className="space-y-2">
-             <div className="text-center py-10 text-gray-500">
-                Funcionalidade de candidaturas em desenvolvimento.
-              </div>
-          </div>
+           <div className="text-center py-10 text-gray-500">Funcionalidade em desenvolvimento.</div>
         )}
         {selectedCategory === "Vagas Salvas" && (
-          <div className="space-y-2">
-             <div className="text-center py-10 text-gray-500">
-                Nenhuma vaga salva.
-              </div>
-          </div>
+           <div className="text-center py-10 text-gray-500">Nenhuma vaga salva.</div>
         )}
       </main>
     </div>

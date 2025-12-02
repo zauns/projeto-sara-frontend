@@ -74,7 +74,7 @@ export const jobService = {
   
   async getJobsByTags(tags: string[]): Promise<VagaResponse[]> {
     try {
-      const response = await api.get(`/buscar/multiplas-tags?tags=${tags}`);
+      const response = await api.get(`/vagas/buscar/multiplas-tags?tags=${tags}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -83,7 +83,7 @@ export const jobService = {
   
   async getJobsBySearch(searchTerm: string): Promise<VagaResponse[]> {
     try {
-      const response = await api.get(`/search?termo=${searchTerm}`);
+      const response = await api.get(`/vagas/search?termo=${searchTerm}`);
       return response.data;
     } catch (error) {
       throw error;
