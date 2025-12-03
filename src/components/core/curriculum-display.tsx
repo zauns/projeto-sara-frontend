@@ -1,114 +1,122 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { curriculumService } from "@/services/curriculumServices";
+import { useState } from "react";
+import { 
+  Loader2, 
+  Download, 
+  FileCheck, 
+  FileX, 
+  PlusCircle, 
+  RefreshCcw 
+} from "lucide-react";
 
-// Props para visualização do currículo
 interface CurriculumDisplayProps {
-  fullName?: string;
-  phoneNumber?: string;
-  email?: string;
-  objective?: string;
-  experience?: string;
-  education?: string;
-  city?: string;
-  skills?: string;
-  onEdit?: () => void; // Callback para iniciar edição
+  hasCurriculum: boolean; // Só precisamos saber se existe ou não
+  candidateName?: string; // Para nomear o arquivo no download
+  onOpenForm: () => void; // Abre o formulário
 }
 
-// Dados placeholder (fallback)
-const placeholderData: Required<Omit<CurriculumDisplayProps, 'onEdit'>> = {
-  fullName: "Nome Completo da Silva",
-  phoneNumber: "(81) 99999-8888",
-  email: "email.exemplo@provedor.com",
-  city: "Recife",
-  objective: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  experience: "Empresa X (2023 - Presente)\n- Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n\nEmpresa Y (2021 - 2023)\n- Excepteur sint occaecat cupidatat non proident.",
-  education: "Graduação em Análise e Desenvolvimento de Sistemas - Faculdade Exemplo (2020 - 2023)",
-  skills: "React, Next.js, TypeScript, TailwindCSS, Node.js, Git, SQL."
-};
+export function CurriculumDisplay({ hasCurriculum, candidateName, onOpenForm }: CurriculumDisplayProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
 
-export function CurriculumDisplay(props: CurriculumDisplayProps) {
-  const data = { ...placeholderData, ...props };
+  const handleDownload = async () => {
+    try {
+      setIsDownloading(true);
+      const blob = await curriculumService.downloadCurriculum();
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      // Nome do arquivo seguro
+      const safeName = candidateName ? candidateName.replace(/\s+/g, '_') : 'meu_curriculo';
+      link.download = `curriculo_${safeName}.pdf`;
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Erro no download:", error);
+      alert("Erro ao baixar o currículo.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
-  return (
-    <div className="p-4">
-      <Card className="bg-white shadow-md border-gray-200">
-        <div className="w-full md:p-6 space-y-6 p-4">
+  // ESTADO 1: Existe Currículo (Card Verde/Azul)
+  if (hasCurriculum) {
+    return (
+      <Card className="p-6 bg-white border border-gray-200 shadow-sm">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           
-          {/* Seção de Contato */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-900">Currículo</h2>
-            <div className="pl-2 border-l-2 border-gray-100 space-y-1">
-              <div className="flex flex-col md:flex-row md:items-center">
-                <span className="font-medium text-gray-600 w-full md:w-40">Nome completo:</span>
-                <span className="text-gray-800 break-words">{data.fullName}</span>
-              </div>
-              <div className="flex flex-col md:flex-row md:items-center">
-                <span className="font-medium text-gray-600 w-full md:w-40">Número:</span>
-                <span className="text-gray-800 break-words">{data.phoneNumber}</span>
-              </div>
-              <div className="flex flex-col md:flex-row md:items-center">
-                <span className="font-medium text-gray-600 w-full md:w-40">Email:</span>
-                <span className="text-gray-800 break-words">{data.email}</span>
-              </div>
-              <div className="flex flex-col md:flex-row md:items-center">
-                <span className="font-medium text-gray-600 w-full md:w-40">Cidade:</span>
-                <span className="text-gray-800 break-words">{data.city}</span>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-100 rounded-full">
+              <FileCheck className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Currículo Disponível</h3>
+              <p className="text-sm text-gray-500">
+                Você já possui um arquivo PDF salvo em nossa base.
+              </p>
             </div>
           </div>
 
-          {/* Seção de Objetivo */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-900">Objetivo Profissional</h2>
-            <div className="pl-2 border-l-2 border-gray-100">
-              <p className="text-gray-700 whitespace-pre-line">{data.objective}</p>
-            </div>
-          </div>
-
-          {/* Seção de Experiência */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-900">Experiência Profissional</h2>
-            <div className="pl-2 border-l-2 border-gray-100">
-              <p className="text-gray-700 whitespace-pre-line">{data.experience}</p>
-            </div>
-          </div>
-
-          {/* Seção de Formação */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-900">Formação Acadêmica</h2>
-            <div className="pl-2 border-l-2 border-gray-100">
-              <p className="text-gray-700 whitespace-pre-line">{data.education}</p>
-            </div>
-          </div>
-
-          {/* Seção de Habilidades */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-900">Habilidades e Competências</h2>
-            <div className="pl-2 border-l-2 border-gray-100">
-              <p className="text-gray-700 whitespace-pre-line">{data.skills}</p>
-            </div>
-          </div>
-
-          {/* Botões de Ação */}
-          <div className="pt-6 border-t border-gray-200 space-y-3">
-            <Button 
-              variant="destructive" 
-              className="w-full bg-red-400 hover:bg-red-500" 
-              onClick={props.onEdit}
-            >
-              Editar Currículo
-            </Button>
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <Button 
               variant="outline" 
-              className="w-full border-red-400 text-red-400 hover:bg-red-50 hover:text-red-500"
-              onClick={() => alert("Funcionalidade de download será implementada com backend")}
+              onClick={handleDownload} 
+              disabled={isDownloading}
+              className="w-full sm:w-auto"
             >
-              Baixar PDF
+              {isDownloading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              Baixar Atual
+            </Button>
+            
+            <Button 
+              onClick={onOpenForm} 
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <RefreshCcw className="w-4 h-4 mr-2" />
+              Atualizar / Criar Novo
             </Button>
           </div>
-
+        </div>
+        
+        <div className="mt-4 p-3 bg-yellow-50 text-yellow-800 text-xs rounded border border-yellow-100 flex items-start">
+          <span className="font-bold mr-1">Nota:</span> 
+          Ao criar um novo currículo, o arquivo anterior será substituído permanentemente.
         </div>
       </Card>
-    </div>
+    );
+  }
+
+  // ESTADO 2: Não Existe Currículo (Card Cinza/Vazio)
+  return (
+    <Card className="p-8 border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center text-center space-y-4">
+      <div className="p-4 bg-white rounded-full shadow-sm">
+        <FileX className="w-10 h-10 text-gray-400" />
+      </div>
+      
+      <div className="max-w-md space-y-1">
+        <h3 className="text-lg font-semibold text-gray-900">Nenhum currículo encontrado</h3>
+        <p className="text-gray-500 text-sm">
+          Ainda não temos um currículo cadastrado para o seu perfil.
+          Preencha o formulário para gerar e enviar seu PDF.
+        </p>
+      </div>
+
+      <Button onClick={onOpenForm} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-2">
+        <PlusCircle className="w-4 h-4 mr-2" />
+        Criar meu Currículo
+      </Button>
+    </Card>
   );
 }

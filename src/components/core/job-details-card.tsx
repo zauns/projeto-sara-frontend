@@ -13,18 +13,19 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Clock, Bookmark, Send, Building2, Edit, Save, X } from "lucide-react";
+
+// Ícones atualizados com Power e Ban
+import { MapPin, Clock, Bookmark, Send, Building2, Edit, Save, X, Trash2, Power, Ban } from "lucide-react";
 import { SuccessDialog } from "@/components/core/success-dialogue";
 
 // 1. Schema de Validação
 const jobSchema = z.object({
   title: z.string().min(3, "O título deve ter pelo menos 3 caracteres"),
   location: z.string().min(2, "Localização obrigatória"),
-  jobType: z.string().min(1, "Tipo de vaga obrigatório"), // Ex: Tempo Integral
-  modality: z.string().min(1, "Modalidade obrigatória"), // Ex: Remoto
-  level: z.string().optional(), // Ex: Sênior
+  jobType: z.string().min(1, "Tipo de vaga obrigatório"), 
+  modality: z.string().min(1, "Modalidade obrigatória"), 
+  level: z.string().optional(), 
   description: z.string().min(50, "A descrição deve ser detalhada (mín. 50 caracteres)"),
-  // Trataremos listas como strings no formulário (separadas por quebra de linha)
   responsibilities: z.string().optional(),
   requirements: z.string().optional(),
 });
@@ -32,6 +33,11 @@ const jobSchema = z.object({
 type JobFormValues = z.infer<typeof jobSchema>;
 
 type JobDetailsCardProps = {
+    jobId?: string;
+    
+    // Status da vaga (Ativa/Inativa)
+    isActive?: boolean;
+    
     title: string;
     companyName: string;
     companyLogoUrl?: string;
@@ -47,14 +53,16 @@ type JobDetailsCardProps = {
     requirements?: string[];
     
     // Ações Usuária
-    onApply?: () => void;
-    onSave?: () => void;
+    onApplyAction?: () => void;
+    onSaveAction?: () => void;
     isApplied?: boolean;
 
     // Ações Empresa
     isCompanyView?: boolean;
-    // Função para atualizar os dados (PUT)
-    onUpdateJob?: (data: JobFormValues & { responsibilitiesArray: string[], requirementsArray: string[] }) => Promise<void>;
+    onUpdateJobAction?: (data: JobFormValues & { responsibilitiesArray: string[], requirementsArray: string[] }) => Promise<void>;
+    onDeleteAction?: (id: string) => Promise<void>;
+    // Nova ação para alternar status
+    onToggleStatusAction?: (newStatus: boolean) => Promise<void>;
 };
 
 export function JobDetailsCard(props: JobDetailsCardProps) {
@@ -62,10 +70,14 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [isApplied, setIsApplied] = useState(props.isApplied || false);
     
-    // Estado de Edição
+    // Estados de controle e edição
     const [isEditing, setIsEditing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    
+    // Estado local de status (Ativa/Inativa)
+    const [isActive, setIsActive] = useState(props.isActive);
+    const [isStatusLoading, setIsStatusLoading] = useState(false);
 
-    // 2. Configuração do Formulário
     const {
         register,
         handleSubmit,
@@ -76,8 +88,12 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
         mode: "onBlur",
     });
 
-    // Sincronizar dados iniciais quando as props mudarem ou ao cancelar edição
+    // Sincroniza o form e o status quando as props mudam
     useEffect(() => {
+        if (props.isActive !== undefined) {
+            setIsActive(props.isActive);
+        }
+
         reset({
             title: props.title,
             location: props.location,
@@ -85,7 +101,6 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
             modality: props.modality,
             level: props.level || "",
             description: props.description,
-            // Converte array para string com quebras de linha para edição fácil
             responsibilities: props.responsibilities?.join("\n") || "",
             requirements: props.requirements?.join("\n") || "",
         });
@@ -96,13 +111,50 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
     const handleApplyClick = () => {
         setIsApplied(true);
         setShowSuccessDialog(true);
-        if (props.onApply) props.onApply();
+        if (props.onApplyAction) props.onApplyAction();
     };
 
-    // 3. Submissão do Formulário
+    const handleDeleteClick = async () => {
+        if (!props.jobId || !props.onDeleteAction) return;
+
+        const confirm = window.confirm("Tem certeza que deseja excluir esta vaga permanentemente? Esta ação não pode ser desfeita.");
+        
+        if (confirm) {
+            try {
+                setIsDeleting(true);
+                await props.onDeleteAction(props.jobId);
+            } catch (error) {
+                console.error("Erro ao deletar", error);
+                // Deixa o pai (page) lidar com o erro
+            } finally {
+                setIsDeleting(false);
+            }
+        }
+    };
+
+    // Handler para alternar status (Ativa <-> Inativa)
+    const handleStatusToggle = async () => {
+        if (!props.onToggleStatusAction) return;
+
+        try {
+            setIsStatusLoading(true);
+            const newStatus = !isActive;
+            
+            // Chama o serviço
+            await props.onToggleStatusAction(newStatus);
+            
+            // Atualiza visualmente
+            setIsActive(newStatus);
+        } catch (error) {
+            // Removemos o 'alert' daqui para não ter UI duplicada com o toast do pai.
+            console.error("Erro no toggle (capturado no card)", error);
+        } finally {
+            setIsStatusLoading(false);
+        }
+    };
+
     const onSubmit = async (data: JobFormValues) => {
-        if (props.onUpdateJob) {
-            // Reconverte as strings de text area para arrays
+        if (props.onUpdateJobAction) {
             const responsibilitiesArray = data.responsibilities
                 ? data.responsibilities.split("\n").filter((item) => item.trim() !== "")
                 : [];
@@ -111,7 +163,7 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                 ? data.requirements.split("\n").filter((item) => item.trim() !== "")
                 : [];
 
-            await props.onUpdateJob({
+            await props.onUpdateJobAction({
                 ...data,
                 responsibilitiesArray,
                 requirementsArray
@@ -125,11 +177,9 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
         <>
             <Card className="w-full max-w-4xl mx-auto bg-white shadow-lg border-gray-200 overflow-hidden">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    {/* --- CABEÇALHO --- */}
                     <CardHeader className="p-6 md:p-8 bg-gray-50/50 border-b border-gray-100">
                         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
                             
-                            {/* Logo (Geralmente não editável na vaga, mas na empresa) */}
                             <Avatar className="h-20 w-20 rounded-xl border border-gray-200 bg-white">
                                 <AvatarImage src={props.companyLogoUrl} alt={props.companyName} />
                                 <AvatarFallback className="rounded-xl bg-indigo-50 text-indigo-600">
@@ -170,11 +220,20 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                                         </div>
                                     </div>
                                 ) : (
-                                    // MODO VISUALIZAÇÃO
                                     <>
-                                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                                            {props.title}
-                                        </h1>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                                                {props.title}
+                                            </h1>
+                                            
+                                            {/* Badge de Status Visual */}
+                                            <Badge 
+                                                variant={isActive ? "default" : "destructive"}
+                                                className={`sm:self-start w-fit ${isActive ? 'bg-green-100 text-green-700 hover:bg-green-200 border-green-200' : 'bg-gray-200 text-gray-600 hover:bg-gray-300 border-gray-300'}`}
+                                            >
+                                                {isActive ? "Recebendo Candidaturas" : "Processo Encerrado"}
+                                            </Badge>
+                                        </div>
                                         
                                         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                                             <span className="font-medium text-indigo-600 flex items-center gap-1">
@@ -210,9 +269,7 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                         </div>
                     </CardHeader>
 
-                    {/* --- CONTEÚDO --- */}
                     <CardContent className="p-6 md:p-8 space-y-8">
-                        
                         <div className="space-y-3">
                             <h3 className="text-lg font-bold text-gray-900">Sobre a vaga</h3>
                             {isEditing ? (
@@ -277,21 +334,38 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                         </div>
                     </CardContent>
 
-                    {/* --- RODAPÉ / AÇÕES --- */}
                     <CardFooter className="p-6 md:p-8 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row gap-4 justify-end">
                         
                         {props.isCompanyView ? (
-                            // MODO EMPRESA
+                            // --- MODO EMPRESA ---
                             isEditing ? (
                                 <>
+                                    {/* Botão de Excluir (Só aparece na edição) */}
+                                    <div className="flex-1 mr-auto">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            onClick={handleDeleteClick}
+                                            disabled={isDeleting || isSubmitting}
+                                        >
+                                            {isDeleting ? "Excluindo..." : (
+                                                <>
+                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                    Excluir Vaga
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+
                                     <Button 
                                         type="button"
                                         variant="outline" 
                                         onClick={() => {
                                             setIsEditing(false);
-                                            reset(); // Reseta para os valores originais das props
+                                            reset(); 
                                         }}
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || isDeleting}
                                     >
                                         <X className="h-4 w-4 mr-2" />
                                         Cancelar
@@ -299,7 +373,7 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                                     <Button 
                                         type="submit" 
                                         className="bg-green-600 hover:bg-green-700 text-white"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || isDeleting}
                                     >
                                         {isSubmitting ? "Salvando..." : (
                                             <>
@@ -310,18 +384,40 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                                     </Button>
                                 </>
                             ) : (
-                                <Button 
-                                    type="button"
-                                    size="lg" 
-                                    className="w-full sm:w-auto bg-[#F55F58] hover:bg-[#d94a44] text-white"
-                                    onClick={() => setIsEditing(true)}
-                                >
-                                    <Edit className="h-5 w-5 mr-2 text-white" />
-                                    Editar Vaga
-                                </Button>
+                                <>
+                                    {/* Botão de Alternar Status (Só aparece quando NÃO está editando) */}
+                                    <div className="flex-1 mr-auto">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className={`${isActive ? 'text-amber-600 border-amber-200 hover:bg-amber-50' : 'text-green-600 border-green-200 hover:bg-green-50'}`}
+                                            onClick={handleStatusToggle}
+                                            disabled={isStatusLoading}
+                                        >
+                                            {isStatusLoading ? (
+                                                <span className="animate-pulse">Atualizando...</span>
+                                            ) : (
+                                                <>
+                                                    <Power className="h-4 w-4 mr-2" />
+                                                    {isActive ? "Encerrar Vaga" : "Reativar Vaga"}
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+
+                                    <Button 
+                                        type="button"
+                                        size="lg" 
+                                        className="w-full sm:w-auto bg-[#F55F58] hover:bg-[#d94a44] text-white"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <Edit className="h-5 w-5 mr-2 text-white" />
+                                        Editar Detalhes
+                                    </Button>
+                                </>
                             )
                         ) : (
-                            // MODO USUÁRIA (Candidata) - Mantido igual
+                            // --- MODO USUÁRIA (Candidata) ---
                             <>
                                 <Button 
                                     type="button"
@@ -339,11 +435,22 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                                 <Button 
                                     type="button"
                                     size="lg" 
-                                    className={`w-full sm:w-auto ${isApplied ? 'bg-green-600 hover:bg-green-700' : 'bg-red-500 hover:bg-red-600'}`}
-                                    onClick={handleApplyClick}
-                                    disabled={isApplied}
+                                    className={`w-full sm:w-auto ${
+                                        !isActive 
+                                            ? 'bg-gray-300 cursor-not-allowed text-gray-500 hover:bg-gray-300' // Estilo Inativo
+                                            : isApplied 
+                                                ? 'bg-green-600 hover:bg-green-700' 
+                                                : 'bg-red-500 hover:bg-red-600'
+                                    }`}
+                                    onClick={isActive ? handleApplyClick : undefined}
+                                    disabled={isApplied || !isActive}
                                 >
-                                    {isApplied ? (
+                                    {!isActive ? (
+                                        <>
+                                            <Ban className="h-5 w-5 mr-2" />
+                                            Vaga Encerrada
+                                        </>
+                                    ) : isApplied ? (
                                         <>
                                             <span className="mr-2">Candidatura Enviada</span>
                                             <span className="text-xl">✓</span>
@@ -357,7 +464,6 @@ export function JobDetailsCard(props: JobDetailsCardProps) {
                                 </Button>
                             </>
                         )}
-
                     </CardFooter>
                 </form>
             </Card>

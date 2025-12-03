@@ -47,6 +47,32 @@ export interface SecretariaProfile {
 
 
 export const userService = {
+  async getAllAccountsRole(role: string): Promise<UserProfileGeneric[]> {
+    try {
+      let response;
+      switch (role) {
+        case "ROLE_SUPER_ADMIN":
+        case "ROLE_ADMIN":
+          response = await api.get<UserProfileGeneric[]>(`/administrador`);
+          return response.data;
+        case "ROLE_USER":
+          response = await api.get<UserProfileGeneric[]>(`/api/user`);
+          return response.data;
+        case "ROLE_EMPRESA":
+          response = await api.get<UserProfileGeneric[]>(`/empresa`);
+          return response.data;
+        case "ROLE_SECRETARIA":
+          response = await api.get<UserProfileGeneric[]>(`/secretaria`);
+          return response.data;
+        default:
+          throw new Error("Role não suportada");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar contas", error);
+      throw error;
+    }
+  },
+  
   async getProfileGeneric(id: string, role: string): Promise<UserProfileGeneric> {
     try {
       let response;
@@ -145,4 +171,29 @@ export const userService = {
         throw error;
       }
     },
+    
+    async deleteProfile(id: string, role: string): Promise<void> {
+      try {
+        switch (role) {
+          case "ROLE_SUPER_ADMIN":
+          case "ROLE_ADMIN":
+            await api.delete(`/administrador/${id}`);
+            break;
+          case "ROLE_USER":
+            await api.delete(`/api/user/${id}`);
+            break;
+          case "ROLE_EMPRESA":
+            await api.delete(`/empresa/${id}`);
+            break;
+          case "ROLE_SECRETARIA":
+            await api.delete(`/secretaria/${id}`);
+            break;
+          default:
+            throw new Error("Role não suportada");
+        }
+      } catch (error) {
+        console.error("Erro ao deletar perfil do usuário", error);
+        throw error;
+      }
+    }
 }

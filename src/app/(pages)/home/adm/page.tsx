@@ -81,7 +81,7 @@ const AdminHome = () => {
       <Header onLogout={logout} />
 
       <main className="flex-grow max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
           {/* Coluna de Empresas Pendentes */}
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-[#F55F58] mb-3 pl-2">

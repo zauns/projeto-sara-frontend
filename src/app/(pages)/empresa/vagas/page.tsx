@@ -8,18 +8,11 @@ import { SearchBar } from "@/components/core/search-bar";
 import { JobCard } from "@/components/core/job-card";
 import { Header } from "@/components/core/header";
 import { Loader2, PlusCircle } from "lucide-react";
-import { jobService, VagaResponse } from "@/services/jobServices"; // Ajuste o caminho
+import { jobService, VagaResponse } from "@/services/jobServices";
+import { VagaCardProps } from "@/components/core/job-card";
 
 // Interface para o JobCard (mantida a consistência)
-interface JobCardProps {
-  titulo: string;
-  empresaNome: string;
-  area: string;
-  tipo: string;
-  modalidade: string;
-  localizacao: string;
-  companyLogoUrl?: string;
-}
+
 
 const MinhasVagas = () => {
   // Obtemos o usuário logado para pegar o ID da empresa
@@ -57,8 +50,8 @@ const MinhasVagas = () => {
     }
   }, [canAccess, user]);
 
-  // Função de transformação: VagaResponse -> JobCardProps
-  const adaptJobToCard = (vaga: VagaResponse): JobCardProps => {
+
+  const adaptJobToCard = (vaga: VagaResponse): VagaCardProps => {
     const safeTags = vaga.tags || [];
 
     return {
@@ -70,6 +63,7 @@ const MinhasVagas = () => {
       tipo: safeTags[1] || "N/A",
       modalidade: safeTags[2] || "N/A",
       localizacao: safeTags[3] || "Remoto",
+      ativa: vaga.ativa,
       companyLogoUrl: "" // Adicionar lógica de logo se necessário
     };
   };
@@ -150,6 +144,7 @@ const MinhasVagas = () => {
                     modalidade={cardProps.modalidade}
                     localizacao={cardProps.localizacao}
                     companyLogoUrl={cardProps.companyLogoUrl}
+                    ativa={cardProps.ativa}
                   />
                 </Link>
               );

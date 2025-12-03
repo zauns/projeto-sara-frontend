@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/select";
 import { Card } from "../ui/card";
 import { useState } from "react";
-import { CurriculumData } from "@/types/curriculum"; // Import do tipo compartilhado
+import { CurriculumData } from "@/types/curriculum"; 
+import jsPDF from "jspdf"; // Biblioteca de geração de PDF
+import { curriculumService } from "@/services/curriculumServices"; // Importação do novo serviço
 
 interface CurriculumFormProps {
-  // Props opcionais para inicialização
   fullName?: string;
   phoneNumber?: string;
   email?: string;
@@ -25,12 +26,11 @@ interface CurriculumFormProps {
   education?: string;
   city?: string;
   skills?: string;
-  onSave: (data: CurriculumData) => void;
+  onSave?: (data: CurriculumData) => void;
   onCancel: () => void;
 }
 
 export function CurriculumForm(props: CurriculumFormProps) {
-  // Garantir que o estado inicial tenha valores padrão (nunca undefined)
   const [formData, setFormData] = useState<CurriculumData>({
     fullName: props.fullName || "",
     phoneNumber: props.phoneNumber || "",
@@ -42,15 +42,94 @@ export function CurriculumForm(props: CurriculumFormProps) {
     skills: props.skills || "",
   });
 
-  // Handler genérico para inputs
+  // Estado para controlar o loading do botão
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleInputChange = (field: keyof CurriculumData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Handler para submit
-  const handleSubmit = (e: React.FormEvent) => {
+  // Função auxiliar para gerar o PDF (Client-Side)
+  const generatePDFBlob = (data: CurriculumData): Blob => {
+    const doc = new jsPDF();
+    const margin = 20;
+    let cursorY = 20;
+
+    // Cabeçalho
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text(data.fullName, margin, cursorY);
+    
+    cursorY += 10;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${data.email} | ${data.phoneNumber} | ${data.city}`, margin, cursorY);
+
+    cursorY += 10;
+    doc.setLineWidth(0.5);
+    doc.line(margin, cursorY, 190, cursorY);
+    cursorY += 10;
+
+    // Função auxiliar para adicionar seções
+    const addSection = (title: string, content: string) => {
+      if (!content) return;
+      
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(title, margin, cursorY);
+      cursorY += 7;
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      
+      // Quebra o texto automaticamente para não estourar a margem
+      const splitText = doc.splitTextToSize(content, 170);
+      doc.text(splitText, margin, cursorY);
+      
+      // Atualiza a posição do cursor baseado no tamanho do texto inserido
+      cursorY += (splitText.length * 6) + 10; 
+    };
+
+    addSection("Objetivo Profissional", data.objective);
+    addSection("Experiência Profissional", data.experience);
+    addSection("Formação Acadêmica", data.education);
+    addSection("Habilidades", data.skills);
+
+    return doc.output('blob');
+  };
+
+  // Handler de envio atualizado
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    props.onSave(formData); // Passa apenas os dados
+    
+    // Validação básica
+    if (!formData.fullName || !formData.email) {
+      alert("Por favor, preencha pelo menos Nome e Email.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // 1. Gerar o arquivo PDF em memória
+      const pdfBlob = generatePDFBlob(formData);
+
+      // 2. Usar o serviço para enviar ao Backend
+      await curriculumService.uploadCurriculum(pdfBlob, formData.fullName);
+
+      alert("Currículo gerado e enviado com sucesso!");
+
+      // 3. Executar callback do pai (se houver) para atualizar UI ou redirecionar
+      if (props.onSave) {
+        props.onSave(formData);
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao enviar o currículo. Verifique sua conexão.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -58,7 +137,6 @@ export function CurriculumForm(props: CurriculumFormProps) {
       <Card className="bg-white shadow-md border-gray-200">
         <form onSubmit={handleSubmit} className="w-full md:p-6 space-y-6">
           
-          {/* Campo Nome completo */}
           <div className="space-y-2">
             <Label htmlFor="fullName">Nome completo</Label>
             <Input 
@@ -69,7 +147,6 @@ export function CurriculumForm(props: CurriculumFormProps) {
             />
           </div>
 
-          {/* Grid para Número e Email */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="phoneNumber">Número</Label>
@@ -92,7 +169,6 @@ export function CurriculumForm(props: CurriculumFormProps) {
             </div>
           </div>
 
-          {/* Campo Objetivo Profissional */}
           <div className="space-y-2">
             <Label htmlFor="objective">Objetivo Profissional</Label>
             <Textarea 
@@ -104,7 +180,6 @@ export function CurriculumForm(props: CurriculumFormProps) {
             />
           </div>
 
-          {/* Campo Experiência Profissional */}
           <div className="space-y-2">
             <Label htmlFor="experience">Experiência Profissional</Label>
             <Textarea 
@@ -116,7 +191,6 @@ export function CurriculumForm(props: CurriculumFormProps) {
             />
           </div>
 
-          {/* Campo Formação Acadêmica */}
           <div className="space-y-2">
             <Label htmlFor="education">Formação Acadêmica</Label>
             <Textarea 
@@ -128,7 +202,6 @@ export function CurriculumForm(props: CurriculumFormProps) {
             />
           </div>
 
-          {/* Campo Habilidades */}
           <div className="space-y-2">
             <Label htmlFor="skills">Habilidades e Competências</Label>
             <Textarea 
@@ -140,7 +213,6 @@ export function CurriculumForm(props: CurriculumFormProps) {
             />
           </div>
 
-          {/* Campo Cidade */}
           <div className="space-y-2">
             <Label htmlFor="city">Cidade</Label>
             <Select 
@@ -151,29 +223,30 @@ export function CurriculumForm(props: CurriculumFormProps) {
                 <SelectValue placeholder="Selecione sua cidade" />
               </SelectTrigger>
               <SelectContent className="bg-white">
-                <SelectItem value="recife">Recife</SelectItem>
-                <SelectItem value="olinda">Olinda</SelectItem>
-                <SelectItem value="jaboatao">Jaboatão dos Guararapes</SelectItem>
-                <SelectItem value="caruaru">Caruaru</SelectItem>
-                <SelectItem value="outra">Outra</SelectItem>
+                <SelectItem value="Recife">Recife</SelectItem>
+                <SelectItem value="Olinda">Olinda</SelectItem>
+                <SelectItem value="Jaboatao">Jaboatão dos Guararapes</SelectItem>
+                <SelectItem value="Caruaru">Caruaru</SelectItem>
+                <SelectItem value="Outra">Outra</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Botões de Ação */}
           <div className="pt-4 space-y-3">
             <Button 
               type="submit"
               variant="destructive" 
               className="w-full bg-red-400 hover:bg-red-500"
+              disabled={isLoading}
             >
-              Salvar alterações
+              {isLoading ? "Enviando..." : "Salvar Currículo"}
             </Button>
             <Button 
               type="button"
               variant="outline" 
               className="w-full border-gray-400 text-gray-700 hover:bg-gray-50"
               onClick={props.onCancel}
+              disabled={isLoading}
             >
               Cancelar
             </Button>

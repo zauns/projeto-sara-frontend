@@ -25,8 +25,10 @@ const secretariaSchema = z.object({
 type SecretariaFormValues = z.infer<typeof secretariaSchema>;
 
 export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | null }) {
-  const { updateUser } = useAuth();
+  const { updateUser, deleteAccount } = useAuth(); // Import deleteAccount
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -60,6 +62,23 @@ export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | nul
   const onSubmit = async (data: SecretariaFormValues) => {
     await updateUser(data);
     setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Atenção: Você está prestes a excluir o perfil desta Secretaria. Isso removerá o acesso ao sistema. Deseja continuar?"
+    );
+
+    if (confirmed) {
+      try {
+        setIsDeleting(true);
+        await deleteAccount();
+      } catch (error) {
+        console.error("Erro ao deletar conta", error);
+        alert("Erro ao excluir conta. Tente novamente.");
+        setIsDeleting(false);
+      }
+    }
   };
 
   return (
@@ -136,32 +155,46 @@ export function SecretariaDetailsCard({ user }: { user?: SecretariaProfile | nul
             </div>
           </div>
 
-          <div className="pt-4 flex justify-end gap-3">
-            {isEditing ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditing(false);
-                    reset();
-                  }}
+          <div className="pt-6 flex flex-col md:flex-row gap-3 justify-between items-center">
+             {/* Zona de Perigo */}
+            {!isEditing && (
+                <Button 
+                    type="button" 
+                    variant="destructive" 
+                    onClick={handleDelete}
+                    disabled={isDeleting}
                 >
-                  Cancelar
+                    {isDeleting ? "Removendo..." : "Remover Secretaria"}
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {isSubmitting ? "Salvando..." : "Confirmar"}
-                </Button>
-              </>
-            ) : (
-              <Button type="button" onClick={() => setIsEditing(true)}>
-                Alterar Dados
-              </Button>
             )}
+
+            <div className="flex gap-3 w-full md:w-auto justify-end">
+                {isEditing ? (
+                <>
+                    <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                        setIsEditing(false);
+                        reset();
+                    }}
+                    >
+                    Cancelar
+                    </Button>
+                    <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-blue-600 hover:bg-blue-700"
+                    >
+                    {isSubmitting ? "Salvando..." : "Confirmar"}
+                    </Button>
+                </>
+                ) : (
+                <Button type="button" onClick={() => setIsEditing(true)}>
+                    Alterar Dados
+                </Button>
+                )}
+            </div>
           </div>
         </form>
       </CardContent>
