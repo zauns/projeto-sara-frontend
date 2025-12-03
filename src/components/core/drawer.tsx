@@ -1,5 +1,5 @@
 // src/components/MobileSidebar.tsx
-"use client"; // Importante para garantir que funcione com hooks no Next.js App Router
+"use client";
 
 import {
   Sheet,
@@ -18,17 +18,17 @@ import {
   Bell,
   User,
   Settings,
-  LogOut,// Adicionei ícones extras que podem ser úteis
+  LogOut,
+  LayoutDashboard, // Importação adicionada
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link"; // Melhor prática no Next.js
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 
 type SideBarProps = {
   onLogout?: () => void;
 };
 
-// Definição da estrutura de um item de menu
 interface MenuItem {
   label: string;
   href: string;
@@ -38,13 +38,11 @@ interface MenuItem {
 export function SideBar({ onLogout }: SideBarProps) {
   const { role, logout } = useAuth();
 
-  // Função para lidar com o Logout
   const handleLogout = () => {
-    logout(); // Limpa contexto e redireciona
-    if (onLogout) onLogout(); // Executa prop opcional se existir
+    logout();
+    if (onLogout) onLogout();
   };
 
-  // Função que retorna os itens de menu baseados na Role
   const getMenuItems = (): MenuItem[] => {
     switch (role) {
       case "ROLE_USER":
@@ -71,7 +69,7 @@ export function SideBar({ onLogout }: SideBarProps) {
       case "ROLE_SUPER_ADMIN":
         return [
           { label: "Home", href: "/home/adm", icon: <Home className="h-5 w-5" /> },
-          // Adicione menus de admin extras aqui se necessário
+          { label: "Dashboard", href: "/dashboard/adm", icon: <LayoutDashboard className="h-5 w-5" /> }, // Item adicionado
         ];
 
       default:
@@ -83,20 +81,18 @@ export function SideBar({ onLogout }: SideBarProps) {
 
   return (
     <Sheet>
-      {/* O Botão que Abre a Sidebar */}
       <SheetTrigger asChild>
         <Button
           className="text-black p-2 rounded-md hover:bg-gray-100"
           aria-label="Abrir menu"
           type="button"
-          variant="ghost" // Usei variant ghost para limpar estilos padrão
+          variant="ghost"
         >
           <Menu className="h-6 w-6" />
           <span className="sr-only">Abrir menu</span>
         </Button>
       </SheetTrigger>
 
-      {/* O Conteúdo da Sidebar que desliza */}
       <SheetContent className="w-[300px] bg-white flex flex-col" side="left">
         <SheetHeader>
           <div className="flex items-center gap-2">
@@ -115,7 +111,6 @@ export function SideBar({ onLogout }: SideBarProps) {
           </SheetDescription>
         </SheetHeader>
 
-        {/* Links de Navegação */}
         <nav className="mt-8 flex flex-col gap-2 flex-grow">
           {menuItems.map((item, index) => (
             <SidebarLink key={index} href={item.href} icon={item.icon}>
@@ -123,11 +118,10 @@ export function SideBar({ onLogout }: SideBarProps) {
             </SidebarLink>
           ))}
 
-          {/* Divisor */}
           <hr className="my-4 border-t border-gray-200" />
 
           <SidebarLink
-            href="#" // href fictício pois o onClick controla a ação
+            href="#"
             icon={<LogOut className="h-5 w-5" />}
             onClick={handleLogout}
           >
@@ -139,7 +133,6 @@ export function SideBar({ onLogout }: SideBarProps) {
   );
 }
 
-// Subcomponente de Link
 type SidebarLinkProps = {
   href: string;
   icon: React.ReactNode;
