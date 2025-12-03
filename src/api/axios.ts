@@ -20,6 +20,9 @@ const privateEndpoints: (string | RegExp)[] = [
   /^\/secretaria\/aprovar\/[^/]+$/,
   "/api/user/create",
 
+  // --- Regex para Rotas de Currículo ---
+  /^\/api\/curriculum\/candidatas\/[^/]+\/curriculos$/,
+
   // --- Regex para Rotas Dinâmicas (Nível 1) ---
   // GET /empresa/{id} e GET /secretaria/{id} continuam privados
   /^\/empresa\/[^/]+$/,

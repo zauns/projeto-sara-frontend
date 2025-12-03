@@ -15,7 +15,7 @@ export interface VagaResponse {
   descricao: string;
   empresa: UserProfileGeneric;
   tags: string[];
-  isAtiva: boolean;
+  ativa: boolean;
 }
 
 export interface VagaCard {
@@ -57,6 +57,7 @@ export const jobService = {
   async getJobById(id: string): Promise<VagaResponse> {
     try {
       const response = await api.get(`/vagas/${id}`);
+      console.log(response.data);
       return response.data;
     } catch (error) {
       throw error;
@@ -98,5 +99,18 @@ export const jobService = {
     } catch (error) {
       throw error;
     }
-  }
+  },
+  
+  async toggleJobStatus(id: string, isAtiva: boolean): Promise<VagaResponse> {
+      try {
+        // Passando isAtiva como Query Param conforme especificado no seu Backend
+        console.log(isAtiva)
+        const response = await api.patch(`/vagas/${id}/status?isAtiva=${isAtiva}`);
+        console.log(response.data)
+        return response.data;
+      } catch (error) {
+        throw error;
+      }
+    },
+
 }

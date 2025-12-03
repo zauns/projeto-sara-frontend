@@ -11,17 +11,9 @@ import { GuideCard } from "@/components/core/guide-card";
 import { Header } from "@/components/core/header";
 import { jobService, VagaResponse } from "../../../../services/jobServices";
 import { Loader2 } from "lucide-react";
+import { VagaCardProps } from "@/components/core/job-card";
 
 // Interface esperada pelo componente JobCard
-interface JobCardProps {
-  titulo: string;
-  empresaNome: string;
-  area: string;
-  tipo: string;
-  modalidade: string;
-  localizacao: string;
-  companyLogoUrl?: string;
-}
 
 const Home = () => {
   const { isLoading: isAuthLoading, canAccess } = useRequireAuth();
@@ -31,7 +23,7 @@ const Home = () => {
   const [isJobsLoading, setIsJobsLoading] = useState(true);
 
   // Função para adaptar os dados da API para o Card
-  const adaptJobToCard = (vaga: VagaResponse): JobCardProps => {
+  const adaptJobToCard = (vaga: VagaResponse): VagaCardProps => {
     const safeTags = vaga.tags || [];
     return {
       titulo: vaga.titulo,
@@ -40,7 +32,8 @@ const Home = () => {
       tipo: safeTags[1] || "N/A",
       modalidade: safeTags[2] || "N/A",
       localizacao: safeTags[3] || "Remoto",
-      companyLogoUrl: (vaga.empresa as any)?.avatarUrl
+      companyLogoUrl: (vaga.empresa as any)?.avatarUrl,
+      ativa: vaga.ativa
     };
   };
 
@@ -129,6 +122,7 @@ const Home = () => {
                           modalidade={cardProps.modalidade}
                           localizacao={cardProps.localizacao}
                           companyLogoUrl={cardProps.companyLogoUrl}
+                          ativa={cardProps.ativa}
                         />
                       </div>
                     </Link>
