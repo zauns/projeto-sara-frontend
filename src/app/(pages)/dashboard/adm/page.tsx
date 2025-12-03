@@ -23,23 +23,32 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchAllAccounts = async () => {
+      // Busca todas as roles em paralelo para performance, com tratamento parcial de erros
+      const roles = [
+        { key: "admins", label: "Administradores", role: "ROLE_ADMIN", setter: setAdmins },
+        { key: "secretaries", label: "Secretarias", role: "ROLE_SECRETARIA", setter: setSecretaries },
+        { key: "companies", label: "Empresas", role: "ROLE_EMPRESA", setter: setCompanies },
+        { key: "users", label: "Usuários", role: "ROLE_USER", setter: setUsers },
+      ];
+
       try {
-        // Busca todas as roles em paralelo para performance
-        const [adminData, secData, compData, userData] = await Promise.all([
-          userService.getAllAccountsRole("ROLE_ADMIN"),
-          userService.getAllAccountsRole("ROLE_SECRETARIA"),
-          userService.getAllAccountsRole("ROLE_EMPRESA"),
-          userService.getAllAccountsRole("ROLE_USER"),
-        ]);
+        const results = await Promise.allSettled(
+          roles.map(r => userService.getAllAccountsRole(r.role))
+        );
 
-        setAdmins(adminData);
-        setSecretaries(secData);
-        setCompanies(compData);
-        setUsers(userData);
-
+        results.forEach((result, idx) => {
+          const { setter, label } = roles[idx];
+          if (result.status === "fulfilled") {
+            setter(result.value);
+          } else {
+            console.error(`Erro ao carregar ${label}:`, result.reason);
+            toast.error(`Erro ao carregar listagem de ${label}.`);
+          }
+        });
       } catch (error) {
+        // Este catch só será chamado se Promise.allSettled lançar, o que é improvável
         console.error(error);
-        toast.error("Erro ao carregar listagem de contas.");
+        toast.error("Erro inesperado ao carregar listagem de contas.");
       } finally {
         setLoadingData(false);
       }
