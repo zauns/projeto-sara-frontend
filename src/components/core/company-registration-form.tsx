@@ -82,7 +82,11 @@ export function CompanyRegistrationForm() {
     setApiError(null);
 
     try {
-      const { ...apiData } = data;
+      const apiData = { 
+        ...data,
+        cnpj: data.cnpj.replace(/\D/g, ""), 
+        telefone: data.telefone.replace(/\D/g, "")
+      };
       await registrationService.registerCompany(apiData as CompanyRegistrationData);
       setShowSuccessDialog(true);
     } catch (err) {
