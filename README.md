@@ -1,260 +1,328 @@
-# Next.js + React + Tailwind CSS + TypeScript + ESLint project template
+<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<a id="readme-top"></a>
+<!--
+*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING! :D
+-->
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app@12`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Index
 
-- [TechStack](#techstack)
-- [Getting Started](#getting-started)
-    - [API Routes](#api-routes)
-- [Learn More](#learn-more)
-    - [Next.js](#nextjs)
-    - [React](#react)
-    - [TailwindCSS](#tailwindcss)
-    - [Eslint](#eslint)
-    - [Husky](#husky)
-- [On commits, branches, and PRs](#on-commits-branches-and-prs)
-- [On Deploying](#on-deploying)
-- [Code Rules and Guidelines](#code-rules-and-guidelines)
-    - [Directory Structure](#directory-structure)
-    - [Naming Conventions](#naming-conventions)
-    - [Code Details](#code-details)
-    - [Styling Conventions](#styling-conventions)
-    - [Extra](#extra)
-- [Library Recommendations](#library-recommendations)
-- [VSCode Extensions](#vscode-extensions)
-- [License](#license)
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+<!--[![project_license][license-shield]][license-url] -->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-## TechStack
 
-- Next.js: 15.1.7
-- React: ^19
-- TypeScript: ^5
-- ESLint: ^9
-- TailwindCSS: ^3.4.17
-- Husky: ^9.1.7
 
-## Getting Started
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/zauns/projeto-sara-frontend">
+    <img src="public/icons/logoSara.png" alt="Logo" width="80" height="80">
+  </a>
 
-Firstly, clone the repository:
+<h3 align="center">Projeto SARA Emprega</h3>
 
-```bash
-git clone https://github.com/seedabit/nextjs-react-typescript.git
-```
+  <p align="center">
+    Vagas para mulheres em situação de vulnerabilidade social
+    <br />
+    <br />
+    <a href="https://github.com/zauns/projeto-sara-frontend/issues/new?labels=bug&template=bug-report---.md">Reportar Bug</a>
+    &middot;
+    <a href="https://github.com/zauns/projeto-sara-frontend/issues/new?labels=enhancement&template=feature-request---.md">Requisitar Feature</a>
+  </p>
+</div>
 
-Then, navigate to the project directory:
 
-```bash
-cd nextjs-react-typescript
-```
 
-Now, install the necessary dependencies:
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Sumário</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">Sobre o Projeto</a>
+      <ul>
+        <li><a href="#built-with">Feito Com</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Rodando o Projeto</a>
+      <ul>
+        <li><a href="#prerequisites">Pré Requisitos</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
 
-```bash
-npm install
-```
 
-Furthermore, run the development server:
 
-```bash
-npm run dev
-```
+<!-- ABOUT THE PROJECT -->
+## Sobre o Projeto
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O projeto consiste em um sistema de conexão de mulheres em situação de vulnerabilidade social a oportunidades de emprego e estágio. A iniciativa visa mitigar o desafio que muitas delas enfrentam para se reinserir no mercado de trabalho, o que compromete sua independência financeira e autoestima. Ao usar a tecnologia para criar essa ponte, a plataforma busca promover a inclusão, autonomia e o fortalecimento de vínculos profissionais.
 
-### API Routes
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/api-route-name](http://localhost:3000/api/hello). This endpoint can be edited in `src/app/api/route.ts`.
 
-The `src/app/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
-## Learn More
+### Feito Com
 
-### Next.js
+* [![Next.js](https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white)](#)
+* 	[![React](https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB)](#)
+* [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
+* [![SonarQube Cloud](https://img.shields.io/badge/SonarQube%20Cloud-126ED3?logo=sonarqubecloud&logoColor=fff)](#)
 
-Next.js is a React framework that enables functionality like server-side rendering, static site generation, and serverless functions. Allows you to build full-stack applications with routing, data fetching, and more.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-> [!IMPORTANT]
-> Next.js has a clear and well documented API. It is recommended to read the documentation to understand the features and capabilities of Next.js.
 
-> [!NOTE]
-> Learn about Next's server side rendering, static site generation, and serverless functions here: [Next.js Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components).
 
-### React
+<!-- GETTING STARTED -->
+## Rodando o Projeto (Front-end Isolado)
 
-React is a JavaScript/Typescript library for building reactive and reusable user interfaces.
+Siga os passos abaixo para configurar e executar o projeto localmente em ambiente de desenvolvimento.
 
-- [React Documentation](https://reactjs.org/docs/getting-started.html) - learn about React features and API.
-- [Learn React](https://reactjs.org/tutorial/tutorial.html) - an interactive React tutorial.
+### Pré-Requisitos
 
-> [!CAUTION]
-> Never use React's own repo creating tools like `create-react-app` with Next.js. Next.js is a React framework that handles all the configurations for you. The common use case for `create-react-app` is not recommended even by the React team.
+Antes de começar, certifique-se de ter as seguintes ferramentas instaladas em seu sistema:
 
-### TailwindCSS
-
-TailwindCSS is a utility-first CSS framework for rapidly building custom designs.
-
-- [TailwindCSS Documentation](https://tailwindcss.com/docs) - learn about TailwindCSS features and API.
-- [Flexbox Cheatsheet](https://css-tricks.com/snippets/css/a-guide-to-flexbox/) - a guide to Flexbox.
-- [Grid Cheatsheet](https://css-tricks.com/snippets/css/complete-guide-grid/) - a guide to Grid.
-
-> [!IMPORTANT]
-> TailwindCSS has a clear and well documented API. It is recommended to read the documentation to understand the features and capabilities of TailwindCSS.
-
-> [!NOTE]
-> To learn the basics of TailwindCSS, the best way is to try it out in a project.
-
-### Eslint
-
-EsLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code. It is highly configurable and can be used to enforce a consistent coding style across your project. Run `npm run lint` to check for linting errors before pushing your code.
-
-- [Eslint Documentation](https://eslint.org/docs/user-guide/getting-started) - learn about Eslint features and API.
-- [Eslint Rules](https://eslint.org/docs/rules/) - a list of all Eslint rules.
-
-> [!WARNING]
-> Eslint will throw errors if the code does not follow the rules defined in `.eslintrc.config.mjs`. It is recommended to fix all linting errors before pushing your code.
-
-### Husky
-
-Husky is a tool that allows you to run scripts before committing or pushing your code. It is used to check for linting errors, run tests, and more. Husky is configured to run Eslint before committing your code in this repository, for example.
-
-- [Husky Documentation](https://typicode.github.io/husky) - learn about Husky features and API.
-
-> [!NOTE]
-> Husky is used to check for linting errors and run tests before committing your code. Make sure to fix all errors before pushing your code. If NEEDED you can skip the Husky checks by adding the `--no-verify` flag to the commit command (`git commit -m "message" -m "detailed description" --no-verify`).
-
-> [!TIP]
-> If you want to use Github Desktop or other GUI tools, you need to add `[root-dir]\Program Files\Git\bin` to the PATH environment variable, above the `[root-dir]\Program Files\Git\cmd` and `[root-dir]\Windows\system32`. Ensuring that Github Desktop finds and uses the correct Git binary.
-
-## On commits, branches, and PRs
-
-For commits, branches, and PRs, follow the guidelines below:
-
-- **PRs**: Always create a PR to merge with the `dev` branch. Never merge directly to the `main` branch. Assume the `main` branch is the production branch.
-- **Branches**: Create branches for each feature or bug fix. Use the format `feature/feature-name`, `bugfix/bug-name`, `issue/issue-number`, etc.
-- **Commits**: Use the [Conventional Commits](https://github.com/iuricode/padroes-de-commits) format for commits.  It's recommended to add a bigger description to the commit message for better understanding. E.g. `git commit -m "feat(login): added login" -m "Added login feature using the firebase auth api`.
-
-> [!NOTE]
-> Commits are checked and validated by Husky and Lint-staged tested. Make sure to fix all errors before pushing your code.
-
-## On Deploying
-
-Don't forget to add environment variables and secrets for deployment. You can use `.env.local` for local development and `.env.production`/`.env` for production. For Github Actions, you can use Github Secrets or Github Environment variables.
-
-There is an always existing environment variable in all Node projects `NODE_ENV`. It's used to track the current execution environment. Use `process.env.NODE_ENV` to check the current environment.
-
-> [!TIP]
-> Don't forget to add the `NEXT_PUBLIC_` prefix to the environment variables you want to use in the client-side code.
-
-## Code Rules and Guidelines
-
-> [!NOTE]
-> The following rules are RECOMMENDED guidelines and aren't strictly forbidden. It is recommended to follow these guidelines for consistency and maintainability.
-
-### Directory Structure
-
-> [!NOTE]
-> Delete the `.gitkeep` files in the directories once you add files to them. It's used so that the directories are tracked by Git.
-
-Maintain the defined directory system for better organization and maintainability, each directory has a specific purpose:
-
-- `src/app/`: Contains all the application pages
-    - `src/app/api`: Contains all the API routes if needed.
-- `src/components`: Contains all the components used in the project.
-    - `src/components/core`: Contains all the core components used in the project.
-    - `src/components/ui`: Contains all the UI components used in the project.
-- `src/hooks`: Contains all the custom hooks used in the project.
-- `src/services`: Contains all the services used in the project.
-- `src/tests`: Contains all the tests for the project.
-- `src/types`: Contains all the types used in the project.
-- `src/utils`: Contains all the utility functions used in the project.
-    - `src/utils/lib`: Contains all the library functions used in the project.
-- `src/data`: Contains all the data used in the project.
-
-### Naming Conventions
-
-- Use camelCase for variables and functions.
-- Use PascalCase for components and classes.
-- Use kebab-case for CSS classes and file names for components.
-
-### Code Details
-
-- Use `const` for variables for safety, if possible.
-- Keep functions clear and concise. If a function is too long, consider breaking it down into smaller functions.
-- Always add documentation to functions (if not self-explanatory).
-    - E.g.
-    ```typescript
-    function func(a: number, b: number): number {
-    /**
-     * Simple function explanation.
-     *
-     * @abstract
-     * Better/longer function explanation.
-     *
-     * @param {number} a - The first number.
-     * @param {number} b - The second number.
-     *
-     * @returns {number} The sum of the two numbers.
-     *
-     * @throws {TypeError} If the parameters are not numbers.
-     */
-        if (typeof a !== 'number' || typeof b !== 'number') {
-            throw new TypeError('Parameters must be numbers.')
-        }
-
-        return a + b
-    }
+* **Node.js** (versão 20 ou superior)
+  - Baixe em: [https://nodejs.org/](https://nodejs.org/)
+  - Verifique a instalação:
+    ```sh
+    node --version
     ```
-- Always type your variables and functions with TypeScript.
-- Use `null` instead of `undefined` for uninitialized variables. Keep your intent clear.
-- Use `===` instead of `==` for comparison. `===` is more strict and prevents type coercion.
-- Create single responsibility components. A component should do one thing and do it well. Be careful of components that do too much (too many props, too many states, etc.).
-- Be careful of the `any` type, only use it when necessary. It defeats the purpose of TypeScript.
-- Handle all possible errors and edge cases. Don't assume the input will always be correct.
 
-### Styling Conventions
+* **npm** (gerenciador de pacotes do Node.js)
+  - Geralmente vem junto com o Node.js
+  - Para atualizar para a versão mais recente:
+    ```sh
+    npm install npm@latest -g
+    ```
+  - Verifique a instalação:
+    ```sh
+    npm --version
+    ```
 
-- Use TailwindCSS classes for styling instead of pixel values. Fixed values aren't responsive and can cause issues on different screen sizes.
-    - E.g. `w-1/2` instead of `width: 200px`.
-- Prefer using `flex` and `grid` for layout instead of `float` and `position`.
-- Use `gap-{value}` or `space-y-{value}` instead of `margin`/`padding` for spacing between elements. Keeps the code cleaner, readable, and responsive.
-- Use `!important` ONLY when necessary. It can cause specificity issues and make the code harder to maintain.
-- You may create separate CSS files for specific use cases (e.g. animated loaders). Keep the CSS file in the same directory as the component using it.
-- Only use inline styles when necessary. It is harder to maintain and can cause specificity issues.
+* **Git** (para clonar o repositório)
+  - Baixe em: [https://git-scm.com/](https://git-scm.com/)
+  - Verifique a instalação:
+    ```sh
+    git --version
+    ```
 
-### Extra
+### Instalação
 
-- Use Next.js's internal routing system for navigation. It is faster and more optimized than using `react-router`. Import `useRouter()` from `next/navigation`.
-- Use the `<Image />` component from `next/image` for images (for optimization).
-- Use `cookie` from `next/headers` for setting and getting cookies.
+1. **Clone o repositório**
+   ```sh
+   git clone https://github.com/zauns/projeto-sara-frontend.git
+   ```
 
-> [!CAUTION]
-> Don't use `useRouter()` from `next/router` for navigation. It's deprecated and not recommended.
+2. **Navegue até o diretório do projeto**
+   ```sh
+   cd projeto-sara-frontend
+   ```
 
-#### Generating Icons for your Application
+3. **Instale as dependências do projeto**
+   ```sh
+   npm install
+   ```
 
-To quickly and easily generate favicons for the app, go to [Favicon Generator](https://realfavicongenerator.net). Upload your image and generate the favicons. Download the zip file and extract it to the `public` directory. Add the instructed code to the `head` tag in the main `layout.tsx` file.
+4. **Configure as variáveis de ambiente**
+   
+   Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis:
+   ```env
+   NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
+   ```
+   
+   > **Nota:** Ajuste a URL do backend conforme necessário. Se você estiver rodando o backend em outra porta ou endereço, atualize a variável `NEXT_PUBLIC_BACKEND_URL`.
 
-## Library Recommendations
+5. **Execute o projeto em modo de desenvolvimento**
+   ```sh
+   npm run dev
+   ```
 
-> [!NOTE]
-> The following libraries are RECOMMENDED for use in the project. It is recommended to use these libraries for better performance, maintainability, and readability.
+6. **Acesse a aplicação**
+   
+   Abra seu navegador e acesse: [http://localhost:3000](http://localhost:3000)
 
-- [Shadcn](https://ui.shadcn.com): A utility library for React/TailwindCSS components, easily customizable and extendable. Use the CLI to generate components, hooks, and more.
-- [Redux](https://redux.js.org): A state management library for React. Easy to use and integrate with React, with a lot of features. Great for global state management.
-- [Framer Motion](https://www.framer.com/motion/): A library for animations in React. Simple and easy to use, with a lot of features.
-- [Lucide](https://lucide.dev): A library of icons for React.
-- [Firebase](https://firebase.google.com): A backend service for authentication, database, storage, and more. Easy to use and integrate with React.
-- [Zod](https://zod.dev): A library for data validation in TypeScript. Quick, robust and easy to use.
-- [Axios](https://axios-http.com): A library for making HTTP requests in React. Easy to use and configure, creating axios instances for different APIs.
+### Comandos Úteis
 
-## VSCode Extensions
+Além do comando de desenvolvimento, o projeto possui outros scripts úteis:
 
-> [!IMPORTANT]
-> The TailwindCSS extension is a must-have for TailwindCSS projects. It provides IntelliSense for TailwindCSS classes.
+* **Desenvolvimento** - Inicia o servidor de desenvolvimento com hot reload:
+  ```sh
+  npm run dev
+  ```
 
-- [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss): IntelliSense for Tailwind CSS.
-- [React](https://marketplace.visualstudio.com/items?itemName=dsznajder.es7-react-js-snippets): React snippets for JSX and TSX.
+* **Build de Produção** - Cria uma versão otimizada para produção:
+  ```sh
+  npm run build
+  ```
+
+* **Iniciar em Produção** - Executa a versão de produção (requer build prévio):
+  ```sh
+  npm start
+  ```
+
+* **Lint** - Verifica o código em busca de problemas:
+  ```sh
+  npm run lint
+  ```
+
+* **Limpeza e Desenvolvimento** - Remove cache e inicia o servidor:
+  ```sh
+  npm run clean-dev
+  ```
+
+### Estrutura de Pastas Principal
+
+```
+projeto-sara-frontend/
+├── src/
+│   ├── app/              # Páginas e rotas do Next.js
+│   ├── components/       # Componentes React reutilizáveis
+│   ├── contexts/         # Context API do React
+│   ├── services/         # Serviços de API
+│   ├── utils/            # Funções utilitárias
+│   └── types/            # Tipos TypeScript
+├── public/               # Arquivos estáticos
+└── package.json          # Dependências e scripts
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- USAGE EXAMPLES 
+## Usage
+
+Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+
+_For more examples, please refer to the [Documentation](https://example.com)_
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- ROADMAP 
+## Roadmap
+
+- [ ] Feature 1
+- [ ] Feature 2
+- [ ] Feature 3
+    - [ ] Nested Feature
+
+See the [open issues](https://github.com/zauns/projeto-sara-frontend/issues) for a full list of proposed features (and known issues).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- CONTRIBUTING -->
+## Contribuindo
+
+Contribuições são o que tornam a comunidade open source um lugar incrível para aprender, inspirar e criar. Quaisquer contribuições que você fizer serão **muito apreciadas**.
+
+Se você tem uma sugestão que tornaria isso melhor, por favor, faça um fork do repositório e crie um pull request. Você também pode simplesmente abrir uma issue com a tag "enhancement".
+Não se esqueça de dar uma estrela ao projeto! Obrigado novamente!
+
+1. Faça um Fork do Projeto
+2. Crie sua Branch de Recurso (`git checkout -b feature/AmazingFeature`)
+3. Faça Commit das Suas Alterações (`git commit -m 'Adicione algum Recurso Incrível'`)
+4. Envie para a Branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+<p align="right">(<a href="#readme-top">voltar ao topo</a>)</p>
+
+### Principais contribuidores:
+
+<a href="https://github.com/zauns/projeto-sara-frontend/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=zauns/projeto-sara-frontend" alt="contrib.rocks image" />
+</a>
+
+
+
+<!-- LICENSE
+## License
+
+Distributed under the project_license. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- CONTACT -->
+## Contact
+
+João Ricardo - joaobarbosa226@gmail.com
+
+Project Link: [https://github.com/zauns/projeto-sara-frontend](https://github.com/zauns/projeto-sara-frontend)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- ACKNOWLEDGMENTS 
+## Reconhecimentos
+
+* []()
+* []()
+* []()
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/zauns/projeto-sara-frontend.svg?style=for-the-badge
+[contributors-url]: https://github.com/zauns/projeto-sara-frontend/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/zauns/projeto-sara-frontend.svg?style=for-the-badge
+[forks-url]: https://github.com/zauns/projeto-sara-frontend/network/members
+[stars-shield]: https://img.shields.io/github/stars/zauns/projeto-sara-frontend.svg?style=for-the-badge
+[stars-url]: https://github.com/zauns/projeto-sara-frontend/stargazers
+[issues-shield]: https://img.shields.io/github/issues/zauns/projeto-sara-frontend.svg?style=for-the-badge
+[issues-url]: https://github.com/zauns/projeto-sara-frontend/issues
+[license-shield]: https://img.shields.io/github/license/zauns/projeto-sara-frontend.svg?style=for-the-badge
+[license-url]: https://github.com/zauns/projeto-sara-frontend/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/jrzzzzz
+[product-screenshot]: images/screenshot.png
+<!-- Shields.io badges. You can a comprehensive list with many more badges at: https://github.com/inttter/md-badges -->
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
+[Vue-url]: https://vuejs.org/
+[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
+[Angular-url]: https://angular.io/
+[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
+[Svelte-url]: https://svelte.dev/
+[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+[Laravel-url]: https://laravel.com
+[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
+[Bootstrap-url]: https://getbootstrap.com
+[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
+[JQuery-url]: https://jquery.com 
